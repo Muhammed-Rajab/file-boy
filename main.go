@@ -1,16 +1,21 @@
 package main
 
 import (
+	"bytes"
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
 	"crypto/sha256"
+	"errors"
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"golang.org/x/crypto/pbkdf2"
 )
+
+var ErrNotEncryptFile = errors.New("file not encrypted")
 
 func main() {
 	data := []byte("This is my data")
@@ -96,6 +101,7 @@ func encryptToFile(data, passphrase []byte, filePath string) error {
 	}
 
 	combined := []byte{}
+	combined = append(combined, []byte("LOVE")...)
 	combined = append(combined, op.Salt...)
 	combined = append(combined, op.IV...)
 	combined = append(combined, op.Data...)
@@ -115,12 +121,14 @@ type DecryptionOp struct {
 }
 
 func decrypt(data, passphrase []byte) (*DecryptionOp, error) {
-	// 0:16 -> salt
-	// 16:28 -> iv
-	// 28: -> encrypted data
-	salt := data[:16]
-	iv := data[16:28]
-	encryptedData := data[28:]
+	format := data[:4]
+	salt := data[4:20]
+	iv := data[20:32]
+	encryptedData := data[32:]
+
+	if !bytes.Equal(format, []byte("LOVE")) {
+		return nil, ErrNotEncryptFile
+	}
 
 	key := deriveKey(passphrase, salt)
 
@@ -161,10 +169,6 @@ func decryptFromFile(filePath string, passphrase []byte) (*DecryptionOp, error) 
 }
 
 func decryptFromToFile(fromPath string, toPath string, passphrase []byte) (*DecryptionOp, error) {
-	// take file path
-	// extract file name
-	// check if to path exists
-	// save the encrypted file without the .encrypt to toPath
 	toDir := filepath.Dir(toPath)
 	fileName := filepath.Base(fromPath)
 
@@ -173,8 +177,14 @@ func decryptFromToFile(fromPath string, toPath string, passphrase []byte) (*Decr
 		return nil, err
 	}
 
-	// write the file to path
-	outputPath := filepath.Join(toDir, fileName+".decrypted")
+	outputFileName := ""
+	if strings.HasSuffix(fileName, ".encrypt") {
+		outputFileName = fileName[:len(fileName)-8] + ".decrypt"
+	} else {
+		outputFileName = ".decrypt"
+	}
+
+	outputPath := filepath.Join(toDir, outputFileName)
 	err = os.WriteFile(outputPath, dop.Data, 0644)
 	if err != nil {
 		return nil, err
