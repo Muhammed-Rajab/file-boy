@@ -3,16 +3,14 @@ package main
 import "github.com/Muhammed-Rajab/file-boy/codec"
 
 func main() {
-	data := []byte("This is my data")
 	passphrase := []byte("password")
 
-	encryptedFilePath := "./test-file.encrypt"
-	err := codec.EncryptToFile(data, passphrase, encryptedFilePath)
+	_, err := codec.EncryptFromToFile("./encrypted/test.file", "./encrypted/", passphrase)
 	if err != nil {
 		panic(err)
 	}
 
-	_, err = codec.DecryptFromToFile(encryptedFilePath, "./decrypted/", passphrase)
+	_, err = codec.DecryptFromToFile("./encrypted/test.file.encrypt", "./decrypted/", passphrase)
 	if err != nil {
 		panic(err)
 	}

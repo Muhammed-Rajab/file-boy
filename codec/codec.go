@@ -16,6 +16,7 @@ import (
 )
 
 var ErrNotEncryptFile = errors.New("file not encrypted")
+var ErrPathDoesNotExist = errors.New("path doesn't exist")
 
 func generateSalt(length uint) ([]byte, error) {
 	salt := make([]byte, length)
@@ -71,31 +72,49 @@ func encrypt(data, passphrase []byte) (*EncryptionOp, error) {
 	}, nil
 }
 
-func EncryptToFile(data, passphrase []byte, filePath string) error {
-	op, err := encrypt(data, passphrase)
+func EncryptFromToFile(fromPath, toPath string, passphrase []byte) (*EncryptionOp, error) {
+	toDir := filepath.Dir(toPath)
+	fileName := filepath.Base(fromPath)
+
+	eop, err := EncryptFromFile(fromPath, passphrase)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	dir := filepath.Dir(filePath)
-	_, err = os.Stat(dir)
+	outputFilePath := filepath.Join(toDir, fileName+".encrypt")
 
-	if err != nil {
-		return err
+	if exist, err := directoryExists(toDir); !exist {
+		return nil, ErrPathDoesNotExist
+	} else if err != nil {
+		return nil, err
 	}
 
 	combined := []byte{}
 	combined = append(combined, []byte("LOVE")...)
-	combined = append(combined, op.Salt...)
-	combined = append(combined, op.IV...)
-	combined = append(combined, op.Data...)
+	combined = append(combined, eop.Salt...)
+	combined = append(combined, eop.IV...)
+	combined = append(combined, eop.Data...)
 
-	err = os.WriteFile(filePath, combined, 0644)
+	err = os.WriteFile(outputFilePath, combined, 0644)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return eop, nil
+}
+
+func EncryptFromFile(filePath string, passphrase []byte) (*EncryptionOp, error) {
+	plain, err := os.ReadFile(filePath)
+	if err != nil {
+		return nil, err
+	}
+
+	eop, err := encrypt(plain, passphrase)
+	if err != nil {
+		return nil, err
+	}
+
+	return eop, nil
 }
 
 type DecryptionOp struct {
