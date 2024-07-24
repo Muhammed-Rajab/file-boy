@@ -182,9 +182,9 @@ func DecryptFromToFile(fromPath string, toPath string, passphrase []byte) (*Decr
 
 	outputFileName := ""
 	if strings.HasSuffix(fileName, ".encrypt") {
-		outputFileName = fileName[:len(fileName)-8] + ".decrypt"
+		outputFileName = fileName[:len(fileName)-8] + ""
 	} else {
-		outputFileName = ".decrypt"
+		outputFileName = ""
 	}
 
 	outputPath := filepath.Join(toDir, outputFileName)
