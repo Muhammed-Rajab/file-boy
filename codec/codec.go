@@ -1,13 +1,13 @@
 package codec
 
 import (
+	"archive/zip"
 	"bytes"
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
 	"crypto/sha256"
 	"errors"
-	"fmt"
 	"io"
 	"io/fs"
 	"os"
@@ -127,30 +127,6 @@ func EncryptFromFile(filePath string, passphrase []byte) (*EncryptionOp, error) 
 	return eop, nil
 }
 
-func EncryptFromDirToDir(fromPath, toPath string, passphrase []byte) ([]EncryptionOp, error) {
-
-	dirs := []string{}
-	paths := []string{}
-
-	err := filepath.WalkDir(fromPath, func(path string, d fs.DirEntry, err error) error {
-		if !d.IsDir() {
-			paths = append(paths, path)
-		} else {
-			dirs = append(dirs, path)
-		}
-		return nil
-	})
-	if err != nil {
-		panic(err)
-	}
-
-	// Make those folders inside the toPath
-	// Encrypt those files and put those files inside the respective folders in toPath
-
-	fmt.Println(paths)
-	return nil, nil
-}
-
 type DecryptionOp struct {
 	FromPath string
 	ToPath   string
@@ -236,4 +212,47 @@ func DecryptFromToFile(fromPath string, toPath string, passphrase []byte) (*Decr
 	dop.ToPath = outputPath
 
 	return dop, err
+}
+
+func EncryptToZip(zipWriter *zip.Writer, fromPath, relPath string, passphrase []byte) error {
+}
+
+func EncryptFromDirToDir(fromPath, toPath string, passphrase []byte) ([]EncryptionOp, error) {
+
+	newZipFile, err := os.Create("./output.zip")
+	if err != nil {
+		return nil, err
+	}
+
+	zipWriter := zip.NewWriter(newZipFile)
+
+	err = filepath.WalkDir(fromPath, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+
+		relativePath, err := filepath.Rel(fromPath, path)
+		if err != nil {
+			return err
+		}
+
+		if d.IsDir() {
+			if relativePath != "." {
+				if _, err = zipWriter.Create(relativePath + "/"); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+
+		// ! CONTINUE HERE
+
+		return nil
+	})
+
+	if err != nil {
+		panic(err)
+	}
+
+	return nil, nil
 }
