@@ -73,6 +73,9 @@ func encrypt(data, passphrase []byte) (*EncryptionOp, error) {
 }
 
 func EncryptFromToFile(fromPath, toPath string, passphrase []byte) (*EncryptionOp, error) {
+	if !strings.HasSuffix(toPath, "/") {
+		toPath += "/"
+	}
 	toDir := filepath.Dir(toPath)
 	fileName := filepath.Base(fromPath)
 
@@ -172,6 +175,9 @@ func DecryptFromFile(filePath string, passphrase []byte) (*DecryptionOp, error) 
 }
 
 func DecryptFromToFile(fromPath string, toPath string, passphrase []byte) (*DecryptionOp, error) {
+	if !strings.HasSuffix(toPath, "/") {
+		toPath += "/"
+	}
 	toDir := filepath.Dir(toPath)
 	fileName := filepath.Base(fromPath)
 
