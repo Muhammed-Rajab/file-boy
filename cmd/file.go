@@ -20,7 +20,6 @@ var fileCmd = &cobra.Command{
 	Short: "encrypt or decrypt the specified file",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		// from, existence, permission
 		from, err := cmd.PersistentFlags().GetString("from")
 		if err != nil {
 			panic(err)
@@ -31,7 +30,6 @@ var fileCmd = &cobra.Command{
 			panic(err)
 		}
 
-		// to, existence, permission
 		to, err := cmd.PersistentFlags().GetString("to")
 		if err != nil {
 			panic(err)
@@ -42,7 +40,6 @@ var fileCmd = &cobra.Command{
 			panic(err)
 		}
 
-		// mode, validation
 		mode, err := cmd.PersistentFlags().GetString("mode")
 		if err != nil {
 			panic(err)
@@ -50,7 +47,6 @@ var fileCmd = &cobra.Command{
 
 		switch utils.ValidateMode(mode) {
 		case utils.ENCRYPT:
-			// ask for passphrase
 			fmt.Print("enter passphrase🔒: ")
 			passphrase, err := term.ReadPassword(int(os.Stdin.Fd()))
 			fmt.Println()
@@ -63,8 +59,6 @@ var fileCmd = &cobra.Command{
 			}
 			fmt.Printf("successfully encrypted\n")
 		case utils.DECRYPT:
-			// do decryption
-			// ask for passphrase
 			fmt.Print("enter passphrase🔒: ")
 			passphrase, err := term.ReadPassword(int(os.Stdin.Fd()))
 			fmt.Println()
@@ -77,7 +71,6 @@ var fileCmd = &cobra.Command{
 			}
 			fmt.Printf("successfully decrypted\n")
 		case utils.INVALID:
-			// throw error as the mode is invalid
 			panic("invalid mode")
 		}
 	},
