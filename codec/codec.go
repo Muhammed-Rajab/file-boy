@@ -31,9 +31,11 @@ func deriveKey(passphrase, salt []byte) []byte {
 }
 
 type EncryptionOp struct {
-	Data []byte
-	Salt []byte
-	IV   []byte
+	FromPath string
+	ToPath   string
+	Data     []byte
+	Salt     []byte
+	IV       []byte
 }
 
 func encrypt(data, passphrase []byte) (*EncryptionOp, error) {
@@ -84,7 +86,7 @@ func EncryptFromToFile(fromPath, toPath string, passphrase []byte) (*EncryptionO
 		return nil, err
 	}
 
-	outputFilePath := filepath.Join(toDir, fileName+".encrypt")
+	outputPath := filepath.Join(toDir, fileName+".encrypt")
 
 	if exist, err := directoryExists(toDir); !exist {
 		return nil, ErrPathDoesNotExist
@@ -98,10 +100,13 @@ func EncryptFromToFile(fromPath, toPath string, passphrase []byte) (*EncryptionO
 	combined = append(combined, eop.IV...)
 	combined = append(combined, eop.Data...)
 
-	err = os.WriteFile(outputFilePath, combined, 0644)
+	err = os.WriteFile(outputPath, combined, 0644)
 	if err != nil {
 		return nil, err
 	}
+
+	eop.FromPath = fromPath
+	eop.ToPath = outputPath
 
 	return eop, nil
 }
@@ -120,10 +125,16 @@ func EncryptFromFile(filePath string, passphrase []byte) (*EncryptionOp, error) 
 	return eop, nil
 }
 
+func EncryptFromDirToDir(fromPath, toPath string, passphrase []byte) ([]EncryptionOp, error) {
+	return nil, nil
+}
+
 type DecryptionOp struct {
-	Data []byte
-	Salt []byte
-	IV   []byte
+	FromPath string
+	ToPath   string
+	Data     []byte
+	Salt     []byte
+	IV       []byte
 }
 
 func decrypt(data, passphrase []byte) (*DecryptionOp, error) {
@@ -198,6 +209,9 @@ func DecryptFromToFile(fromPath string, toPath string, passphrase []byte) (*Decr
 	if err != nil {
 		return nil, err
 	}
+
+	dop.FromPath = fromPath
+	dop.ToPath = outputPath
 
 	return dop, err
 }
