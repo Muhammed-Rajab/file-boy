@@ -7,7 +7,9 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"errors"
+	"fmt"
 	"io"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -126,6 +128,26 @@ func EncryptFromFile(filePath string, passphrase []byte) (*EncryptionOp, error) 
 }
 
 func EncryptFromDirToDir(fromPath, toPath string, passphrase []byte) ([]EncryptionOp, error) {
+
+	dirs := []string{}
+	paths := []string{}
+
+	err := filepath.WalkDir(fromPath, func(path string, d fs.DirEntry, err error) error {
+		if !d.IsDir() {
+			paths = append(paths, path)
+		} else {
+			dirs = append(dirs, path)
+		}
+		return nil
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	// Make those folders inside the toPath
+	// Encrypt those files and put those files inside the respective folders in toPath
+
+	fmt.Println(paths)
 	return nil, nil
 }
 

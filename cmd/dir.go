@@ -6,6 +6,7 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/Muhammed-Rajab/file-boy/codec"
 	"github.com/Muhammed-Rajab/file-boy/utils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -50,6 +51,10 @@ var dirCmd = &cobra.Command{
 		switch utils.ValidateMode(mode) {
 		case utils.ENCRYPT:
 			fmt.Println("encrypt")
+			_, err := codec.EncryptFromDirToDir(from, to, []byte(""))
+			if err != nil {
+				panic(err)
+			}
 		case utils.DECRYPT:
 			fmt.Println("decrypt")
 		case utils.INVALID:
