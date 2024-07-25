@@ -5,10 +5,13 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
+	"github.com/Muhammed-Rajab/file-boy/codec"
 	"github.com/Muhammed-Rajab/file-boy/utils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"golang.org/x/term"
 )
 
 // fileCmd represents the file command
@@ -47,11 +50,32 @@ var fileCmd = &cobra.Command{
 
 		switch utils.ValidateMode(mode) {
 		case utils.ENCRYPT:
-			// do encryption
-			fmt.Println("encrypt")
+			// ask for passphrase
+			fmt.Print("enter passphrase🔒: ")
+			passphrase, err := term.ReadPassword(int(os.Stdin.Fd()))
+			fmt.Println()
+			if err != nil {
+				panic(err)
+			}
+			_, err = codec.EncryptFromToFile(from, to, passphrase)
+			if err != nil {
+				panic(err)
+			}
+			fmt.Printf("successfully encrypted\n")
 		case utils.DECRYPT:
 			// do decryption
-			fmt.Println("decrypt")
+			// ask for passphrase
+			fmt.Print("enter passphrase🔒: ")
+			passphrase, err := term.ReadPassword(int(os.Stdin.Fd()))
+			fmt.Println()
+			if err != nil {
+				panic(err)
+			}
+			_, err = codec.DecryptFromToFile(from, to, passphrase)
+			if err != nil {
+				panic(err)
+			}
+			fmt.Printf("successfully decrypted\n")
 		case utils.INVALID:
 			// throw error as the mode is invalid
 			panic("invalid mode")
