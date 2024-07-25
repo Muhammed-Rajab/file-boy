@@ -51,7 +51,7 @@ var dirCmd = &cobra.Command{
 		switch utils.ValidateMode(mode) {
 		case utils.ENCRYPT:
 			fmt.Println("encrypt")
-			_, err := codec.EncryptFromDirToDir(from, to, []byte(""))
+			_, err := codec.EncryptFromDirToZip(from, to, []byte(""))
 			if err != nil {
 				panic(err)
 			}
