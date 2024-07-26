@@ -43,18 +43,14 @@ var dirCmd = &cobra.Command{
 			panic(err)
 		}
 
-		// compress, err := cmd.PersistentFlags().GetBool("compress")
-		// if err != nil {
-		// 	panic(err)
-		// }
-
 		switch utils.ValidateMode(mode) {
 		case utils.ENCRYPT:
-			fmt.Println("encrypt")
 			_, err := codec.EncryptFromDirToZip(from, to, []byte(""))
 			if err != nil {
 				panic(err)
 			}
+			fmt.Println("successfully encrypted folder to zip")
+
 		case utils.DECRYPT:
 			fmt.Println("decrypt")
 		case utils.INVALID:
@@ -77,7 +73,4 @@ func init() {
 
 	dirCmd.PersistentFlags().StringP("mode", "m", "e", "the mode(encrypt|eE|decrypt|dD)")
 	viper.BindPFlag("mode", dirCmd.PersistentFlags().Lookup("mode"))
-
-	dirCmd.PersistentFlags().BoolP("compress", "c", false, "compress the directory to a zip file")
-	viper.BindPFlag("compress", dirCmd.PersistentFlags().Lookup("compress"))
 }

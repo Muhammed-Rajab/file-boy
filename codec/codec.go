@@ -40,6 +40,15 @@ type EncryptionOp struct {
 	IV       []byte
 }
 
+func (eop *EncryptionOp) AsBytes() []byte {
+	combined := []byte{}
+	combined = append(combined, []byte("LOVE")...)
+	combined = append(combined, eop.Salt...)
+	combined = append(combined, eop.IV...)
+	combined = append(combined, eop.Data...)
+	return combined
+}
+
 func encrypt(data, passphrase []byte) (*EncryptionOp, error) {
 	salt, err := generateSalt(16)
 	if err != nil {
@@ -96,11 +105,7 @@ func EncryptFromToFile(fromPath, toPath string, passphrase []byte) (*EncryptionO
 		return nil, err
 	}
 
-	combined := []byte{}
-	combined = append(combined, []byte("LOVE")...)
-	combined = append(combined, eop.Salt...)
-	combined = append(combined, eop.IV...)
-	combined = append(combined, eop.Data...)
+	combined := eop.AsBytes()
 
 	err = os.WriteFile(outputPath, combined, 0644)
 	if err != nil {
@@ -248,7 +253,7 @@ func EncryptFromDirToZip(fromPath, toPath string, passphrase []byte) ([]Encrypti
 		}
 
 		// If it's a file
-		if err := addFileToZip(zipWriter, path, relPath); err != nil {
+		if err := addEncryptedFileToZip(zipWriter, path, relPath, passphrase); err != nil {
 			return err
 		}
 
@@ -262,33 +267,28 @@ func EncryptFromDirToZip(fromPath, toPath string, passphrase []byte) ([]Encrypti
 	return nil, nil
 }
 
-func addFileToZip(zipWriter *zip.Writer, filePath, relPath string) error {
-	fileToZip, err := os.Open(filePath)
-	if err != nil {
-		return err
-	}
-	defer fileToZip.Close()
+func addEncryptedFileToZip(zipWriter *zip.Writer, filePath, relPath string, passphrase []byte) error {
 
-	info, err := fileToZip.Stat()
+	eop, err := EncryptFromFile(filePath, passphrase)
 	if err != nil {
 		return err
 	}
 
-	header, err := zip.FileInfoHeader(info)
-	if err != nil {
-		return err
-	}
-	header.Name = relPath
-	header.Method = zip.Deflate
+	combined := eop.AsBytes()
 
-	writer, err := zipWriter.CreateHeader(header)
+	zipFileEntry, err := zipWriter.Create(relPath + ".encrypt")
 	if err != nil {
 		return err
 	}
 
-	_, err = io.Copy(writer, fileToZip)
+	_, err = zipFileEntry.Write(combined)
 	if err != nil {
 		return err
 	}
+
 	return nil
+}
+
+func DecryptFromZipToDir(fromPath, toPath string, passphrase []byte) ([]DecryptionOp, error) {
+	return nil, nil
 }
