@@ -225,10 +225,12 @@ func EncryptFromDirToZip(fromPath, toPath string, passphrase []byte) ([]Encrypti
 	}
 
 	zipWriter := zip.NewWriter(newZipFile)
+	defer zipWriter.Close()
 
 	err = filepath.WalkDir(fromPath, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
-			return err
+			panic(err)
+			// return err
 		}
 
 		relPath, err := filepath.Rel(fromPath, path)
@@ -243,34 +245,15 @@ func EncryptFromDirToZip(fromPath, toPath string, passphrase []byte) ([]Encrypti
 					return err
 				}
 			}
+			return nil
 		}
 
 		// If it's a file
-		fileToZip, err := os.Open(path)
-		if err != nil {
-			return err
-		}
-		defer fileToZip.Close()
-
-		info, err := fileToZip.Stat()
-		if err != nil {
+		if err := addFileToZip(zipWriter, path, relPath); err != nil {
 			return err
 		}
 
-		header, err := zip.FileInfoHeader(info)
-		if err != nil {
-			return err
-		}
-		header.Name = relPath
-		header.Method = zip.Deflate
-
-		writer, err := zipWriter.CreateHeader(header)
-		if err != nil {
-			return err
-		}
-
-		_, err = io.Copy(writer, fileToZip)
-		return err
+		return nil
 	})
 
 	if err != nil {
@@ -278,4 +261,35 @@ func EncryptFromDirToZip(fromPath, toPath string, passphrase []byte) ([]Encrypti
 	}
 
 	return nil, nil
+}
+
+func addFileToZip(zipWriter *zip.Writer, filePath, relPath string) error {
+	fileToZip, err := os.Open(filePath)
+	if err != nil {
+		return err
+	}
+	defer fileToZip.Close()
+
+	info, err := fileToZip.Stat()
+	if err != nil {
+		return err
+	}
+
+	header, err := zip.FileInfoHeader(info)
+	if err != nil {
+		return err
+	}
+	header.Name = relPath
+	header.Method = zip.Deflate
+
+	writer, err := zipWriter.CreateHeader(header)
+	if err != nil {
+		return err
+	}
+
+	_, err = io.Copy(writer, fileToZip)
+	if err != nil {
+		return err
+	}
+	return nil
 }
