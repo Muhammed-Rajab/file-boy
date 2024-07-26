@@ -229,8 +229,7 @@ func EncryptFromDirToZip(fromPath, toPath string, passphrase []byte) ([]Encrypti
 
 	err = filepath.WalkDir(fromPath, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
-			panic(err)
-			// return err
+			return err
 		}
 
 		relPath, err := filepath.Rel(fromPath, path)
