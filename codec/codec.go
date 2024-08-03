@@ -3,14 +3,10 @@ package codec
 import (
 	"crypto/rand"
 	"crypto/sha256"
-	"errors"
 	"io"
 
 	"golang.org/x/crypto/pbkdf2"
 )
-
-var ErrNotEncryptFile = errors.New("file not encrypted")
-var ErrPathDoesNotExist = errors.New("path doesn't exist")
 
 func generateSalt(length uint) ([]byte, error) {
 	salt := make([]byte, length)
