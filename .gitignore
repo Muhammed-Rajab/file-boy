@@ -6,3 +6,5 @@ encrypted/*
 *.encrypt
 *.decrypt
 output.zip
+build/*
+file-boy

@@ -6,6 +6,7 @@ import (
 	"crypto/cipher"
 	"io/fs"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 )
@@ -115,7 +116,8 @@ func EncryptFromFile(filePath string, passphrase []byte) (*EncryptionOp, error) 
 
 func EncryptFromDirToZip(fromPath, toPath string, passphrase []byte) ([]EncryptionOp, error) {
 
-	newZipFile, err := os.Create("./output.zip")
+	// Check if the to path exists and all
+	newZipFile, err := os.Create(path.Join(toPath, "output.zip"))
 	if err != nil {
 		return nil, err
 	}
@@ -128,6 +130,7 @@ func EncryptFromDirToZip(fromPath, toPath string, passphrase []byte) ([]Encrypti
 			return err
 		}
 
+		// relative to from path
 		relPath, err := filepath.Rel(fromPath, path)
 		if err != nil {
 			return err
@@ -152,7 +155,7 @@ func EncryptFromDirToZip(fromPath, toPath string, passphrase []byte) ([]Encrypti
 	})
 
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	return nil, nil
