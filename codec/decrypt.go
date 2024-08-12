@@ -96,6 +96,10 @@ func DecryptFromToFile(fromPath string, toPath string, passphrase []byte) (*Decr
 	return dop, err
 }
 
-func DecryptFromZipToDir(fromPath, toPath string, passphrase []byte) ([]DecryptionOp, error) {
+func DecryptFromDirToDir(fromPath, toPath string, passphrase []byte) ([]DecryptionOp, error) {
+	// Go through all
+	// Check if the file encrypted type
+	// Create a new 'base folder', and create all the new folders inside the folder
+	// For every file in the zip, decrypt it and save it to the 'base folder'
 	return nil, nil
 }

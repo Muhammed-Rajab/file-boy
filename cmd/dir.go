@@ -52,7 +52,11 @@ var dirCmd = &cobra.Command{
 			fmt.Println("successfully encrypted folder to zip")
 
 		case utils.DECRYPT:
-			fmt.Println("decrypt")
+			_, err := codec.DecryptFromDirToDir(from, to, []byte(""))
+			if err != nil {
+				panic(err)
+			}
+			fmt.Println("successfully decrypted folder")
 		case utils.INVALID:
 			panic("invalid mode")
 		}
