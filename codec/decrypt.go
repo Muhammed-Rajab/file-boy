@@ -6,6 +6,7 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"io/fs"
+	"log"
 	"os"
 	"path"
 	"path/filepath"
@@ -162,18 +163,22 @@ func addDecryptedFileToZip(writer *zip.Writer, path, relPath string, passphrase 
 	}
 
 	dop, err := DecryptFromFile(path, passphrase)
-	if err != nil {
+	// ! DON'T PANIC IF THERE'S A NON ENCRYPTED FILE
+	if err == ErrNotEncryptFile {
+		log.Println("not encrypted file found")
+		return nil
+	} else if err != nil {
 		return err
 	}
 
 	entry, err := writer.Create(filepath.Join(toDir, outputFileName))
 	if err != nil {
-		return nil
+		return err
 	}
 
 	_, err = entry.Write(dop.Data)
 	if err != nil {
-		return nil
+		return err
 	}
 
 	return nil
