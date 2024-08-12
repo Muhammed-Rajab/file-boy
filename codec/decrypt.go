@@ -55,9 +55,14 @@ func decrypt(data, passphrase []byte) (*DecryptionOp, error) {
 }
 
 func DecryptFromFile(filePath string, passphrase []byte) (*DecryptionOp, error) {
+
 	encrypted, err := os.ReadFile(filePath)
 	if err != nil {
 		return nil, err
+	}
+
+	if !bytes.Equal(encrypted[0:4], []byte("LOVE")) {
+		return nil, ErrNotEncryptFile
 	}
 
 	dop, err := decrypt(encrypted, passphrase)
@@ -120,8 +125,6 @@ func DecryptFromDirToDir(fromPath, toPath string, passphrase []byte) ([]Decrypti
 			return err
 		}
 
-		// if dir, except '.'
-		// create a new dir
 		if d.IsDir() {
 			if relPath != "." {
 				if _, err := zipWriter.Create(filepath.Join(relPath + "/")); err != nil {
@@ -148,7 +151,6 @@ func DecryptFromDirToDir(fromPath, toPath string, passphrase []byte) ([]Decrypti
 
 func addDecryptedFileToZip(writer *zip.Writer, path, relPath string, passphrase []byte) error {
 
-	// check if the file is of type '.encrypted'
 	toDir := filepath.Dir(relPath)
 	fileName := filepath.Base(relPath)
 
@@ -158,8 +160,6 @@ func addDecryptedFileToZip(writer *zip.Writer, path, relPath string, passphrase 
 	} else {
 		outputFileName = fileName
 	}
-
-	// ! CHECK IF THE FIRST BYTES ARE 'LOVE'
 
 	dop, err := DecryptFromFile(path, passphrase)
 	if err != nil {
