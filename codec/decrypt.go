@@ -82,7 +82,11 @@ func DecryptFromToFile(fromPath string, toPath string, passphrase []byte) (*Decr
 	fileName := filepath.Base(fromPath)
 
 	dop, err := DecryptFromFile(fromPath, passphrase)
-	if err != nil {
+	// ! DON'T PANIC IF THERE'S A NON ENCRYPTED FILE
+	if err == ErrNotEncryptFile {
+		log.Println("not encrypted file found")
+		return nil, nil
+	} else if err != nil {
 		return nil, err
 	}
 
@@ -105,7 +109,7 @@ func DecryptFromToFile(fromPath string, toPath string, passphrase []byte) (*Decr
 	return dop, err
 }
 
-func DecryptFromDirToDir(fromPath, toPath string, passphrase []byte) ([]DecryptionOp, error) {
+func DecryptFromDirToZip(fromPath, toPath string, passphrase []byte) ([]DecryptionOp, error) {
 
 	outputZipFile, err := os.Create(path.Join(toPath, "decrypted.zip"))
 	if err != nil {

@@ -71,7 +71,7 @@ var dirCmd = &cobra.Command{
 			if err != nil {
 				panic(err)
 			}
-			_, err = codec.DecryptFromDirToDir(from, to, passphrase)
+			_, err = codec.DecryptFromDirToZip(from, to, passphrase)
 			if err != nil {
 				panic(err)
 			}
