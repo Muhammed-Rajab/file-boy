@@ -5,6 +5,7 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/Muhammed-Rajab/file-boy/codec"
 	"github.com/Muhammed-Rajab/file-boy/utils"
@@ -25,7 +26,7 @@ var dirCmd = &cobra.Command{
 		// * Get all the flags
 		verbose, err := cmd.PersistentFlags().GetBool("verbose")
 		if err != nil {
-			panic(err)
+			log.Fatalln(err)
 		}
 		mode, err := cmd.PersistentFlags().GetString("mode")
 		if err != nil {
