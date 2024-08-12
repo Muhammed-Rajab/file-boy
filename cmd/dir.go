@@ -4,8 +4,8 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"fmt"
 	"log"
+	"time"
 
 	"github.com/Muhammed-Rajab/file-boy/codec"
 	"github.com/Muhammed-Rajab/file-boy/utils"
@@ -61,25 +61,34 @@ var dirCmd = &cobra.Command{
 			if err != nil {
 				panic(err)
 			}
+			start := time.Now()
+			if cdc.IsVerbose() {
+				log.Printf("started at %v", start)
+			}
 			_, err = cdc.EncryptFromDirToZip(from, to, passphrase)
 			if err != nil {
 				log.Fatalln(err)
 			}
 			if cdc.IsVerbose() {
-				fmt.Println("successfully encrypted folder to zip")
+				end := time.Now()
+				log.Printf("successfully encrypted '%s'. ended at %v, took %d seconds.\n", from, end, end.Sub(start).Milliseconds())
 			}
-
 		case utils.DECRYPT:
 			passphrase, err := utils.GetPassphraseFromUser(false)
 			if err != nil {
 				log.Fatalln(err)
+			}
+			start := time.Now()
+			if cdc.IsVerbose() {
+				log.Printf("started at %v", start)
 			}
 			_, err = cdc.DecryptFromDirToZip(from, to, passphrase)
 			if err != nil {
 				log.Fatalln(err)
 			}
 			if cdc.IsVerbose() {
-				fmt.Println("successfully decrypted folder")
+				end := time.Now()
+				log.Printf("successfully decrypted '%s'. ended at %v, took %d seconds.\n", from, end, end.Sub(start).Milliseconds())
 			}
 		case utils.INVALID:
 			log.Fatalf("invalid mode '%s' provided. valid options (are e|E|encrypt|d|D|decrypt)\n", mode)
