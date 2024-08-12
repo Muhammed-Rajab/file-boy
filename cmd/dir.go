@@ -59,7 +59,7 @@ var dirCmd = &cobra.Command{
 		case utils.ENCRYPT:
 			passphrase, err := utils.GetPassphraseFromUser(true)
 			if err != nil {
-				panic(err)
+				log.Fatalln(err)
 			}
 			start := time.Now()
 			if cdc.IsVerbose() {

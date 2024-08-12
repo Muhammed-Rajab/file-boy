@@ -81,7 +81,6 @@ var fileCmd = &cobra.Command{
 			_, err = cdc.DecryptFromToFile(from, to, passphrase)
 			if err != nil {
 				log.Fatalln(err)
-				panic(err)
 			}
 			if cdc.IsVerbose() {
 				end := time.Now()

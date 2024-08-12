@@ -136,7 +136,6 @@ func (c *Codec) DecryptFromToFile(fromPath string, toPath string, passphrase []b
 	fileName := filepath.Base(fromPath)
 
 	dop, err := decryptFromFile(fromPath, passphrase)
-	// ! DON'T PANIC IF THERE'S A NON ENCRYPTED FILE
 	if err != nil {
 		return nil, err
 	}
