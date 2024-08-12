@@ -5,13 +5,11 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/Muhammed-Rajab/file-boy/codec"
 	"github.com/Muhammed-Rajab/file-boy/utils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"golang.org/x/term"
 )
 
 // fileCmd represents the file command
@@ -20,48 +18,51 @@ var fileCmd = &cobra.Command{
 	Short: "encrypt or decrypt the specified file",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
+		// * Get necessary flags
+		verbose, err := cmd.PersistentFlags().GetBool("verbose")
+		if err != nil {
+			panic(err)
+		}
+		mode, err := cmd.PersistentFlags().GetString("mode")
+		if err != nil {
+			panic(err)
+		}
 		from, err := cmd.PersistentFlags().GetString("from")
 		if err != nil {
 			panic(err)
 		}
+		to, err := cmd.PersistentFlags().GetString("to")
+		if err != nil {
+			panic(err)
+		}
+
 		if exist, err := utils.FileExists(from); !exist {
 			panic("file path does not exist")
 		} else if err != nil {
 			panic(err)
 		}
 
-		to, err := cmd.PersistentFlags().GetString("to")
-		if err != nil {
-			panic(err)
-		}
 		if exist, err := utils.DirExists(to); !exist {
 			panic("dir path does not exist")
 		} else if err != nil {
 			panic(err)
 		}
 
-		mode, err := cmd.PersistentFlags().GetString("mode")
-		if err != nil {
-			panic(err)
-		}
+		cdc := codec.NewCodec(verbose)
 
 		switch utils.ValidateMode(mode) {
 		case utils.ENCRYPT:
-			fmt.Print("enter passphrase🔒: ")
-			passphrase, err := term.ReadPassword(int(os.Stdin.Fd()))
-			fmt.Println()
+			passphrase, err := utils.GetPassphraseFromUser(true)
 			if err != nil {
 				panic(err)
 			}
-			_, err = codec.EncryptFromToFile(from, to, passphrase)
+			_, err = cdc.EncryptFromToFile(from, to, passphrase)
 			if err != nil {
 				panic(err)
 			}
-			fmt.Printf("successfully encrypted\n")
+			fmt.Printf("successfully encrypted '%s'\n", from)
 		case utils.DECRYPT:
-			fmt.Print("enter passphrase🔒: ")
-			passphrase, err := term.ReadPassword(int(os.Stdin.Fd()))
-			fmt.Println()
+			passphrase, err := utils.GetPassphraseFromUser(false)
 			if err != nil {
 				panic(err)
 			}
@@ -69,7 +70,7 @@ var fileCmd = &cobra.Command{
 			if err != nil {
 				panic(err)
 			}
-			fmt.Printf("successfully decrypted\n")
+			fmt.Printf("successfully decrypted '%s'\n", from)
 		case utils.INVALID:
 			panic("invalid mode")
 		}
@@ -78,6 +79,10 @@ var fileCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(fileCmd)
+
+	fileCmd.PersistentFlags().BoolP("verbose", "v", false, "show detailed ouput")
+	fileCmd.MarkPersistentFlagRequired("verbose")
+	viper.BindPFlag("verbose", fileCmd.PersistentFlags().Lookup("verbose"))
 
 	fileCmd.PersistentFlags().StringP("from", "f", "", "the path to the file to encrypt/decrypt from")
 	fileCmd.MarkPersistentFlagRequired("from")
