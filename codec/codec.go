@@ -140,12 +140,6 @@ func (c *Codec) DecryptFromToFile(fromPath string, toPath string, passphrase []b
 	if err != nil {
 		return nil, err
 	}
-	// if err == ErrNotEncryptFile && c.verbose {
-	// 	log.Println("not encrypted file found")
-	// 	return nil, nil
-	// } else if err != nil {
-	// 	return nil, err
-	// }
 
 	outputFileName := ""
 	if strings.HasSuffix(fileName, ".encrypt") {
