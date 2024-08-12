@@ -5,6 +5,7 @@ package cmd
 
 import (
 	"log"
+	"os"
 	"time"
 
 	"github.com/Muhammed-Rajab/file-boy/codec"
@@ -20,6 +21,10 @@ var fileCmd = &cobra.Command{
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		// * Get necessary flags
+		writeToStdOut, err := cmd.PersistentFlags().GetBool("stdout")
+		if err != nil {
+			log.Fatalln(err)
+		}
 		verbose, err := cmd.PersistentFlags().GetBool("verbose")
 		if err != nil {
 			log.Fatalln(err)
@@ -57,14 +62,24 @@ var fileCmd = &cobra.Command{
 			if err != nil {
 				log.Fatalln(err)
 			}
+
 			start := time.Now()
 			if cdc.IsVerbose() {
 				log.Printf("started at %v", start)
 			}
-			_, err = cdc.EncryptFromToFile(from, to, passphrase)
+
+			eop, err := cdc.EncryptFromToFile(from, to, passphrase)
 			if err != nil {
 				log.Fatalln(err)
 			}
+
+			if writeToStdOut {
+				_, err = os.Stdout.Write(eop.Data)
+				if err != nil {
+					log.Fatalln(err)
+				}
+			}
+
 			if cdc.IsVerbose() {
 				end := time.Now()
 				log.Printf("successfully encrypted '%s'. ended at %v, took %d seconds.\n", from, end, end.Sub(start).Milliseconds())
@@ -78,10 +93,19 @@ var fileCmd = &cobra.Command{
 			if cdc.IsVerbose() {
 				log.Printf("started at %v", start)
 			}
-			_, err = cdc.DecryptFromToFile(from, to, passphrase)
+
+			dop, err := cdc.DecryptFromToFile(from, to, passphrase)
 			if err != nil {
 				log.Fatalln(err)
 			}
+
+			if writeToStdOut {
+				_, err = os.Stdout.Write(dop.Data)
+				if err != nil {
+					log.Fatalln(err)
+				}
+			}
+
 			if cdc.IsVerbose() {
 				end := time.Now()
 				log.Printf("successfully decrypted '%s'. ended at %v, took %d seconds.\n", from, end, end.Sub(start).Milliseconds())
@@ -97,6 +121,9 @@ func init() {
 
 	fileCmd.PersistentFlags().BoolP("verbose", "v", false, "show detailed ouput")
 	viper.BindPFlag("verbose", fileCmd.PersistentFlags().Lookup("verbose"))
+
+	fileCmd.PersistentFlags().BoolP("stdout", "s", false, "writes the encrypted/decrypted data to os.Stdout")
+	viper.BindPFlag("stdout", fileCmd.PersistentFlags().Lookup("stdout"))
 
 	fileCmd.PersistentFlags().StringP("from", "f", "", "the path to the file to encrypt/decrypt from")
 	fileCmd.MarkPersistentFlagRequired("from")
