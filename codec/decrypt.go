@@ -22,6 +22,11 @@ type DecryptionOp struct {
 }
 
 func decrypt(data, passphrase []byte) (*DecryptionOp, error) {
+	// ! prevents from slicing error
+	if len(data) < 32 {
+		return nil, ErrNotEncryptFile
+	}
+
 	format := data[:4]
 	salt := data[4:20]
 	iv := data[20:32]
@@ -60,10 +65,6 @@ func DecryptFromFile(filePath string, passphrase []byte) (*DecryptionOp, error) 
 	encrypted, err := os.ReadFile(filePath)
 	if err != nil {
 		return nil, err
-	}
-
-	if !bytes.Equal(encrypted[0:4], []byte("LOVE")) {
-		return nil, ErrNotEncryptFile
 	}
 
 	dop, err := decrypt(encrypted, passphrase)
