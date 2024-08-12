@@ -30,42 +30,40 @@ var dirCmd = &cobra.Command{
 		}
 		mode, err := cmd.PersistentFlags().GetString("mode")
 		if err != nil {
-			panic(err)
+			log.Fatalln(err)
 		}
 		from, err := cmd.PersistentFlags().GetString("from")
 		if err != nil {
-			panic(err)
+			log.Fatalln(err)
 		}
 		to, err := cmd.PersistentFlags().GetString("to")
 		if err != nil {
-			panic(err)
+			log.Fatalln(err)
 		}
 
 		if exist, err := utils.DirExists(from); !exist {
-			panic("directory path does not exist")
+			log.Fatalf("the directory '%s' does not exists\n", from)
 		} else if err != nil {
-			panic(err)
+			log.Fatalln(err)
 		}
 
 		if exist, err := utils.DirExists(to); !exist {
-			panic("directory path does not exist")
+			log.Fatalf("the directory '%s' does not exists\n", to)
 		} else if err != nil {
-			panic(err)
+			log.Fatalln(err)
 		}
 
 		cdc := codec.NewCodec(verbose)
 
 		switch utils.ValidateMode(mode) {
 		case utils.ENCRYPT:
-			// If encrypt mode, then check if 'from' dir exists
-			// If encrypt mode, then check if 'to' dir exists
 			passphrase, err := utils.GetPassphraseFromUser(true)
 			if err != nil {
 				panic(err)
 			}
 			_, err = cdc.EncryptFromDirToZip(from, to, passphrase)
 			if err != nil {
-				panic(err)
+				log.Fatalln(err)
 			}
 			if cdc.IsVerbose() {
 				fmt.Println("successfully encrypted folder to zip")
@@ -74,17 +72,17 @@ var dirCmd = &cobra.Command{
 		case utils.DECRYPT:
 			passphrase, err := utils.GetPassphraseFromUser(false)
 			if err != nil {
-				panic(err)
+				log.Fatalln(err)
 			}
 			_, err = cdc.DecryptFromDirToZip(from, to, passphrase)
 			if err != nil {
-				panic(err)
+				log.Fatalln(err)
 			}
 			if cdc.IsVerbose() {
 				fmt.Println("successfully decrypted folder")
 			}
 		case utils.INVALID:
-			panic("invalid mode")
+			log.Fatalf("invalid mode '%s' provided. valid options (are e|E|encrypt|d|D|decrypt)\n", mode)
 		}
 
 	},
