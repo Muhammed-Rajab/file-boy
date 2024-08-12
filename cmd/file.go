@@ -5,6 +5,7 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/Muhammed-Rajab/file-boy/codec"
 	"github.com/Muhammed-Rajab/file-boy/utils"
@@ -21,31 +22,31 @@ var fileCmd = &cobra.Command{
 		// * Get necessary flags
 		verbose, err := cmd.PersistentFlags().GetBool("verbose")
 		if err != nil {
-			panic(err)
+			log.Fatalln(err)
 		}
 		mode, err := cmd.PersistentFlags().GetString("mode")
 		if err != nil {
-			panic(err)
+			log.Fatalln(err)
 		}
 		from, err := cmd.PersistentFlags().GetString("from")
 		if err != nil {
-			panic(err)
+			log.Fatalln(err)
 		}
 		to, err := cmd.PersistentFlags().GetString("to")
 		if err != nil {
-			panic(err)
+			log.Fatalln(err)
 		}
 
 		if exist, err := utils.FileExists(from); !exist {
-			panic("file path does not exist")
+			log.Fatalf("the file path '%s' does not exist\n", from)
 		} else if err != nil {
-			panic(err)
+			log.Fatalln(err)
 		}
 
 		if exist, err := utils.DirExists(to); !exist {
-			panic("dir path does not exist")
+			log.Fatalf("the directory path '%s' does not exist\n", to)
 		} else if err != nil {
-			panic(err)
+			log.Fatalln(err)
 		}
 
 		cdc := codec.NewCodec(verbose)
@@ -54,11 +55,11 @@ var fileCmd = &cobra.Command{
 		case utils.ENCRYPT:
 			passphrase, err := utils.GetPassphraseFromUser(true)
 			if err != nil {
-				panic(err)
+				log.Fatalln(err)
 			}
 			_, err = cdc.EncryptFromToFile(from, to, passphrase)
 			if err != nil {
-				panic(err)
+				log.Fatalln(err)
 			}
 			if cdc.IsVerbose() {
 				fmt.Printf("successfully encrypted '%s'\n", from)
@@ -66,17 +67,18 @@ var fileCmd = &cobra.Command{
 		case utils.DECRYPT:
 			passphrase, err := utils.GetPassphraseFromUser(false)
 			if err != nil {
-				panic(err)
+				log.Fatalln(err)
 			}
 			_, err = cdc.DecryptFromToFile(from, to, passphrase)
 			if err != nil {
+				log.Fatalln(err)
 				panic(err)
 			}
 			if cdc.IsVerbose() {
 				fmt.Printf("successfully decrypted '%s'\n", from)
 			}
 		case utils.INVALID:
-			panic("invalid mode")
+			log.Fatalf("invalid mode '%s' provided. valid options (are e|E|encrypt|d|D|decrypt)\n", mode)
 		}
 	},
 }
