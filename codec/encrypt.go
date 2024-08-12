@@ -1,7 +1,6 @@
 package codec
 
 import (
-	"archive/zip"
 	"crypto/aes"
 	"crypto/cipher"
 	"os"
@@ -72,26 +71,4 @@ func encryptFromFile(filePath string, passphrase []byte) (*EncryptionOp, error) 
 	}
 
 	return eop, nil
-}
-
-func addEncryptedFileToZip(zipWriter *zip.Writer, filePath, relPath string, passphrase []byte) error {
-
-	eop, err := encryptFromFile(filePath, passphrase)
-	if err != nil {
-		return err
-	}
-
-	combined := eop.AsBytes()
-
-	zipFileEntry, err := zipWriter.Create(relPath + ".encrypt")
-	if err != nil {
-		return err
-	}
-
-	_, err = zipFileEntry.Write(combined)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }

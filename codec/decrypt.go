@@ -1,16 +1,10 @@
 package codec
 
 import (
-	"archive/zip"
 	"bytes"
 	"crypto/aes"
 	"crypto/cipher"
-	"io/fs"
-	"log"
 	"os"
-	"path"
-	"path/filepath"
-	"strings"
 )
 
 type DecryptionOp struct {
@@ -60,7 +54,7 @@ func decrypt(data, passphrase []byte) (*DecryptionOp, error) {
 	}, nil
 }
 
-func DecryptFromFile(filePath string, passphrase []byte) (*DecryptionOp, error) {
+func decryptFromFile(filePath string, passphrase []byte) (*DecryptionOp, error) {
 
 	encrypted, err := os.ReadFile(filePath)
 	if err != nil {
@@ -73,118 +67,4 @@ func DecryptFromFile(filePath string, passphrase []byte) (*DecryptionOp, error) 
 	}
 
 	return dop, nil
-}
-
-func DecryptFromToFile(fromPath string, toPath string, passphrase []byte) (*DecryptionOp, error) {
-	if !strings.HasSuffix(toPath, "/") {
-		toPath += "/"
-	}
-	toDir := filepath.Dir(toPath)
-	fileName := filepath.Base(fromPath)
-
-	dop, err := DecryptFromFile(fromPath, passphrase)
-	// ! DON'T PANIC IF THERE'S A NON ENCRYPTED FILE
-	if err == ErrNotEncryptFile {
-		log.Println("not encrypted file found")
-		return nil, nil
-	} else if err != nil {
-		return nil, err
-	}
-
-	outputFileName := ""
-	if strings.HasSuffix(fileName, ".encrypt") {
-		outputFileName = fileName[:len(fileName)-8] + ""
-	} else {
-		outputFileName = ""
-	}
-
-	outputPath := filepath.Join(toDir, outputFileName)
-	err = os.WriteFile(outputPath, dop.Data, 0644)
-	if err != nil {
-		return nil, err
-	}
-
-	dop.FromPath = fromPath
-	dop.ToPath = outputPath
-
-	return dop, err
-}
-
-func DecryptFromDirToZip(fromPath, toPath string, passphrase []byte) ([]DecryptionOp, error) {
-
-	outputZipFile, err := os.Create(path.Join(toPath, "decrypted.zip"))
-	if err != nil {
-		return nil, err
-	}
-
-	zipWriter := zip.NewWriter(outputZipFile)
-	defer zipWriter.Close()
-
-	// Go through all
-	err = filepath.WalkDir(fromPath, func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-
-		relPath, err := filepath.Rel(fromPath, path)
-		if err != nil {
-			return err
-		}
-
-		if d.IsDir() {
-			if relPath != "." {
-				if _, err := zipWriter.Create(filepath.Join(relPath + "/")); err != nil {
-					return err
-				}
-			}
-			return nil
-		}
-
-		// if a file
-		if err := addDecryptedFileToZip(zipWriter, path, relPath, passphrase); err != nil {
-			return err
-		}
-
-		return nil
-	})
-
-	if err != nil {
-		return nil, err
-	}
-
-	return nil, nil
-}
-
-func addDecryptedFileToZip(writer *zip.Writer, path, relPath string, passphrase []byte) error {
-
-	toDir := filepath.Dir(relPath)
-	fileName := filepath.Base(relPath)
-
-	outputFileName := ""
-	if strings.HasSuffix(fileName, ".encrypt") {
-		outputFileName = fileName[:len(fileName)-8]
-	} else {
-		outputFileName = fileName
-	}
-
-	dop, err := DecryptFromFile(path, passphrase)
-	// ! DON'T PANIC IF THERE'S A NON ENCRYPTED FILE
-	if err == ErrNotEncryptFile {
-		log.Println("not encrypted file found")
-		return nil
-	} else if err != nil {
-		return err
-	}
-
-	entry, err := writer.Create(filepath.Join(toDir, outputFileName))
-	if err != nil {
-		return err
-	}
-
-	_, err = entry.Write(dop.Data)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }

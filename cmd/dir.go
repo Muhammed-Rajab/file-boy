@@ -25,6 +25,10 @@ var dirCmd = &cobra.Command{
 		// IF mode is 'd' from is zip(file)
 
 		// * Get all the flags
+		verbose, err := cmd.PersistentFlags().GetBool("verbose")
+		if err != nil {
+			panic(err)
+		}
 		mode, err := cmd.PersistentFlags().GetString("mode")
 		if err != nil {
 			panic(err)
@@ -50,6 +54,8 @@ var dirCmd = &cobra.Command{
 			panic(err)
 		}
 
+		cdc := codec.NewCodec(verbose)
+
 		switch utils.ValidateMode(mode) {
 		case utils.ENCRYPT:
 			// If encrypt mode, then check if 'from' dir exists
@@ -58,7 +64,7 @@ var dirCmd = &cobra.Command{
 			if err != nil {
 				panic(err)
 			}
-			_, err = codec.EncryptFromDirToZip(from, to, passphrase)
+			_, err = cdc.EncryptFromDirToZip(from, to, passphrase)
 			if err != nil {
 				panic(err)
 			}
@@ -71,7 +77,7 @@ var dirCmd = &cobra.Command{
 			if err != nil {
 				panic(err)
 			}
-			_, err = codec.DecryptFromDirToZip(from, to, passphrase)
+			_, err = cdc.DecryptFromDirToZip(from, to, passphrase)
 			if err != nil {
 				panic(err)
 			}
@@ -85,6 +91,10 @@ var dirCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(dirCmd)
+
+	dirCmd.PersistentFlags().BoolP("verbose", "v", false, "show detailed ouput")
+	dirCmd.MarkPersistentFlagRequired("verbose")
+	viper.BindPFlag("verbose", dirCmd.PersistentFlags().Lookup("verbose"))
 
 	dirCmd.PersistentFlags().StringP("from", "f", "", "the path to the directory to encrypt/decrypt from")
 	dirCmd.MarkPersistentFlagRequired("from")

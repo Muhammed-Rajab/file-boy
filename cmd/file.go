@@ -66,7 +66,7 @@ var fileCmd = &cobra.Command{
 			if err != nil {
 				panic(err)
 			}
-			_, err = codec.DecryptFromToFile(from, to, passphrase)
+			_, err = cdc.DecryptFromToFile(from, to, passphrase)
 			if err != nil {
 				panic(err)
 			}
