@@ -1,8 +1,12 @@
 package utils
 
 import (
+	"bytes"
+	"fmt"
 	"os"
 	"strings"
+
+	"golang.org/x/term"
 )
 
 func FileExists(filePath string) (bool, error) {
@@ -43,4 +47,25 @@ func ValidateMode(mode string) OperationMode {
 	} else {
 		return INVALID
 	}
+}
+
+func GetPassphraseFromUser(confirm bool) ([]byte, error) {
+	fmt.Print("enter passphrase🔒: ")
+	passphrase, err := term.ReadPassword(int(os.Stdin.Fd()))
+	fmt.Println()
+	if confirm {
+		fmt.Print("re-enter passphrase🔒: ")
+		reentered, err := term.ReadPassword(int(os.Stdin.Fd()))
+		fmt.Println()
+		if err != nil {
+			return nil, err
+		}
+		if !bytes.Equal(passphrase, reentered) {
+			return nil, ErrMismatchingPassphrase
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+	return passphrase, nil
 }

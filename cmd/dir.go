@@ -20,36 +20,41 @@ var dirCmd = &cobra.Command{
 	Short: "encrypt or decrypt the specified directory",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
+
+		// IF mode is 'e' from is dir
+		// IF mode is 'd' from is zip(file)
+
+		// * Get all the flags
+		mode, err := cmd.PersistentFlags().GetString("mode")
+		if err != nil {
+			panic(err)
+		}
 		from, err := cmd.PersistentFlags().GetString("from")
 		if err != nil {
 			panic(err)
 		}
+		to, err := cmd.PersistentFlags().GetString("to")
+		if err != nil {
+			panic(err)
+		}
+
 		if exist, err := utils.DirExists(from); !exist {
 			panic("directory path does not exist")
 		} else if err != nil {
 			panic(err)
 		}
 
-		to, err := cmd.PersistentFlags().GetString("to")
-		if err != nil {
-			panic(err)
-		}
 		if exist, err := utils.DirExists(to); !exist {
 			panic("directory path does not exist")
 		} else if err != nil {
 			panic(err)
 		}
 
-		mode, err := cmd.PersistentFlags().GetString("mode")
-		if err != nil {
-			panic(err)
-		}
-
 		switch utils.ValidateMode(mode) {
 		case utils.ENCRYPT:
-			fmt.Print("enter passphrase🔒: ")
-			passphrase, err := term.ReadPassword(int(os.Stdin.Fd()))
-			fmt.Println()
+			// If encrypt mode, then check if 'from' dir exists
+			// If encrypt mode, then check if 'to' dir exists
+			passphrase, err := utils.GetPassphraseFromUser(true)
 			if err != nil {
 				panic(err)
 			}
