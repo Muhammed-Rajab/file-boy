@@ -60,7 +60,9 @@ var fileCmd = &cobra.Command{
 			if err != nil {
 				panic(err)
 			}
-			fmt.Printf("successfully encrypted '%s'\n", from)
+			if cdc.IsVerbose() {
+				fmt.Printf("successfully encrypted '%s'\n", from)
+			}
 		case utils.DECRYPT:
 			passphrase, err := utils.GetPassphraseFromUser(false)
 			if err != nil {
@@ -70,7 +72,9 @@ var fileCmd = &cobra.Command{
 			if err != nil {
 				panic(err)
 			}
-			fmt.Printf("successfully decrypted '%s'\n", from)
+			if cdc.IsVerbose() {
+				fmt.Printf("successfully decrypted '%s'\n", from)
+			}
 		case utils.INVALID:
 			panic("invalid mode")
 		}

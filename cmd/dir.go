@@ -5,13 +5,11 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/Muhammed-Rajab/file-boy/codec"
 	"github.com/Muhammed-Rajab/file-boy/utils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"golang.org/x/term"
 )
 
 // dirCmd represents the dir command
@@ -68,12 +66,12 @@ var dirCmd = &cobra.Command{
 			if err != nil {
 				panic(err)
 			}
-			fmt.Println("successfully encrypted folder to zip")
+			if cdc.IsVerbose() {
+				fmt.Println("successfully encrypted folder to zip")
+			}
 
 		case utils.DECRYPT:
-			fmt.Print("enter passphrase🔒: ")
-			passphrase, err := term.ReadPassword(int(os.Stdin.Fd()))
-			fmt.Println()
+			passphrase, err := utils.GetPassphraseFromUser(false)
 			if err != nil {
 				panic(err)
 			}
@@ -81,7 +79,9 @@ var dirCmd = &cobra.Command{
 			if err != nil {
 				panic(err)
 			}
-			fmt.Println("successfully decrypted folder")
+			if cdc.IsVerbose() {
+				fmt.Println("successfully decrypted folder")
+			}
 		case utils.INVALID:
 			panic("invalid mode")
 		}

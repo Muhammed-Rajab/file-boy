@@ -20,6 +20,10 @@ func NewCodec(verbose bool) Codec {
 	}
 }
 
+func (c *Codec) IsVerbose() bool {
+	return c.verbose
+}
+
 // ENCRYPTION
 func (c *Codec) EncryptFromDirToZip(fromPath, toPath string, passphrase []byte) ([]EncryptionOp, error) {
 
