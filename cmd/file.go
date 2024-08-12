@@ -4,8 +4,8 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"fmt"
 	"log"
+	"time"
 
 	"github.com/Muhammed-Rajab/file-boy/codec"
 	"github.com/Muhammed-Rajab/file-boy/utils"
@@ -57,17 +57,26 @@ var fileCmd = &cobra.Command{
 			if err != nil {
 				log.Fatalln(err)
 			}
+			start := time.Now()
+			if cdc.IsVerbose() {
+				log.Printf("started at %v", start)
+			}
 			_, err = cdc.EncryptFromToFile(from, to, passphrase)
 			if err != nil {
 				log.Fatalln(err)
 			}
 			if cdc.IsVerbose() {
-				fmt.Printf("successfully encrypted '%s'\n", from)
+				end := time.Now()
+				log.Printf("successfully encrypted '%s'. ended at %v, took %d seconds.\n", from, end, end.Sub(start).Milliseconds())
 			}
 		case utils.DECRYPT:
 			passphrase, err := utils.GetPassphraseFromUser(false)
 			if err != nil {
 				log.Fatalln(err)
+			}
+			start := time.Now()
+			if cdc.IsVerbose() {
+				log.Printf("started at %v", start)
 			}
 			_, err = cdc.DecryptFromToFile(from, to, passphrase)
 			if err != nil {
@@ -75,7 +84,8 @@ var fileCmd = &cobra.Command{
 				panic(err)
 			}
 			if cdc.IsVerbose() {
-				fmt.Printf("successfully decrypted '%s'\n", from)
+				end := time.Now()
+				log.Printf("successfully encrypted '%s'. ended at %v, took %d seconds.\n", from, end, end.Sub(start).Milliseconds())
 			}
 		case utils.INVALID:
 			log.Fatalf("invalid mode '%s' provided. valid options (are e|E|encrypt|d|D|decrypt)\n", mode)
