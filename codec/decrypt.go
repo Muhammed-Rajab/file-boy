@@ -1,10 +1,13 @@
 package codec
 
 import (
+	"archive/zip"
 	"bytes"
 	"crypto/aes"
 	"crypto/cipher"
+	"io/fs"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 )
@@ -97,9 +100,81 @@ func DecryptFromToFile(fromPath string, toPath string, passphrase []byte) (*Decr
 }
 
 func DecryptFromDirToDir(fromPath, toPath string, passphrase []byte) ([]DecryptionOp, error) {
+
+	outputZipFile, err := os.Create(path.Join(toPath, "decrypted.zip"))
+	if err != nil {
+		return nil, err
+	}
+
+	zipWriter := zip.NewWriter(outputZipFile)
+	defer zipWriter.Close()
+
 	// Go through all
-	// Check if the file encrypted type
-	// Create a new 'base folder', and create all the new folders inside the folder
-	// For every file in the zip, decrypt it and save it to the 'base folder'
+	err = filepath.WalkDir(fromPath, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+
+		relPath, err := filepath.Rel(fromPath, path)
+		if err != nil {
+			return err
+		}
+
+		// if dir, except '.'
+		// create a new dir
+		if d.IsDir() {
+			if relPath != "." {
+				if _, err := zipWriter.Create(filepath.Join(relPath + "/")); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+
+		// if a file
+		if err := addDecryptedFileToZip(zipWriter, path, relPath, passphrase); err != nil {
+			return err
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
 	return nil, nil
+}
+
+func addDecryptedFileToZip(writer *zip.Writer, path, relPath string, passphrase []byte) error {
+
+	// check if the file is of type '.encrypted'
+	toDir := filepath.Dir(relPath)
+	fileName := filepath.Base(relPath)
+
+	outputFileName := ""
+	if strings.HasSuffix(fileName, ".encrypt") {
+		outputFileName = fileName[:len(fileName)-8]
+	} else {
+		outputFileName = fileName
+	}
+
+	// ! CHECK IF THE FIRST BYTES ARE 'LOVE'
+
+	dop, err := DecryptFromFile(path, passphrase)
+	if err != nil {
+		return err
+	}
+
+	entry, err := writer.Create(filepath.Join(toDir, outputFileName))
+	if err != nil {
+		return nil
+	}
+
+	_, err = entry.Write(dop.Data)
+	if err != nil {
+		return nil
+	}
+
+	return nil
 }
