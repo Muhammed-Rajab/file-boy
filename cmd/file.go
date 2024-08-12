@@ -85,7 +85,6 @@ func init() {
 	rootCmd.AddCommand(fileCmd)
 
 	fileCmd.PersistentFlags().BoolP("verbose", "v", false, "show detailed ouput")
-	fileCmd.MarkPersistentFlagRequired("verbose")
 	viper.BindPFlag("verbose", fileCmd.PersistentFlags().Lookup("verbose"))
 
 	fileCmd.PersistentFlags().StringP("from", "f", "", "the path to the file to encrypt/decrypt from")

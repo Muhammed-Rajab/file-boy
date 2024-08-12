@@ -94,7 +94,6 @@ func init() {
 	rootCmd.AddCommand(dirCmd)
 
 	dirCmd.PersistentFlags().BoolP("verbose", "v", false, "show detailed ouput")
-	dirCmd.MarkPersistentFlagRequired("verbose")
 	viper.BindPFlag("verbose", dirCmd.PersistentFlags().Lookup("verbose"))
 
 	dirCmd.PersistentFlags().StringP("from", "f", "", "the path to the directory to encrypt/decrypt from")
