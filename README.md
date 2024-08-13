@@ -121,3 +121,9 @@ This command decrypts the `/path/to/encrypted/files/directory` directory and res
 - [❌] output decrypted `.zip` file from decrypting an encrypted directory to stdout
 - [❌] ability to pass the encrypted directory files with metadata to other programs
 - [❌] ability to pass the decrypted directory files with metadata to other programs
+
+## Contributing
+
+Contributions are always welcome!
+
+If you have a feature request, please open a new pull request with the regarding details. I'll be more than happy to connect with like-minded people😃!
