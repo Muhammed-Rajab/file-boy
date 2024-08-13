@@ -21,44 +21,15 @@ var fileCmd = &cobra.Command{
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		// * Get necessary flags
-		writeToStdOut, err := cmd.PersistentFlags().GetBool("stdout")
-		if err != nil {
-			log.Fatalln(err)
-		}
-		verbose, err := cmd.PersistentFlags().GetBool("verbose")
-		if err != nil {
-			log.Fatalln(err)
-		}
-		mode, err := cmd.PersistentFlags().GetString("mode")
-		if err != nil {
-			log.Fatalln(err)
-		}
-		from, err := cmd.PersistentFlags().GetString("from")
-		if err != nil {
-			log.Fatalln(err)
-		}
-		to, err := cmd.PersistentFlags().GetString("to")
-		if err != nil {
-			log.Fatalln(err)
-		}
+		flags := getFileFlags(cmd)
+		from := flags.From
+		to := flags.From
+		verbose := flags.Verbose
+		writeToStdOut := flags.WriteToStdout
+		mode := flags.Mode
 
-		if exist, err := utils.FileExists(from); !exist {
-			log.Fatalf("the file path '%s' does not exist\n", from)
-		} else if err != nil {
-			log.Fatalln(err)
-		}
-
-		// ! if 'to' is given, then only validate it, else
-		// ! just output the stuff to stdout, if given
-		if to != "" {
-			if exist, err := utils.DirExists(to); !exist {
-				log.Fatalf("the directory path '%s' does not exist\n", to)
-			} else if err != nil {
-				log.Fatalln(err)
-			}
-		} else if to == "" && !writeToStdOut {
-			log.Fatalln("must provide -t <path> or -s, otherwise the operation is useless")
-		}
+		// * validate the flags
+		validateFileFlags(flags)
 
 		cdc := codec.NewCodec(verbose)
 
@@ -74,8 +45,8 @@ var fileCmd = &cobra.Command{
 				log.Printf("started at %v", start)
 			}
 
+			// if to path is provided, save to file, else try to stdout it
 			var eop *codec.EncryptionOp
-
 			if to != "" {
 				eop, err = cdc.EncryptFromToFile(from, to, passphrase)
 				if err != nil {
@@ -110,7 +81,6 @@ var fileCmd = &cobra.Command{
 			}
 
 			var dop *codec.DecryptionOp
-
 			if to != "" {
 				dop, err = cdc.DecryptFromToFile(from, to, passphrase)
 				if err != nil {
@@ -154,10 +124,67 @@ func init() {
 	viper.BindPFlag("from", fileCmd.PersistentFlags().Lookup("from"))
 
 	fileCmd.PersistentFlags().StringP("to", "t", "", "the path to the directory to encrypt/decrypt to")
-	// fileCmd.MarkPersistentFlagRequired("to")
 	viper.BindPFlag("to", fileCmd.PersistentFlags().Lookup("to"))
 
 	fileCmd.PersistentFlags().StringP("mode", "m", "e", "the mode(encrypt|eE|decrypt|dD)")
-	// fileCmd.MarkPersistentFlagRequired("mode")
 	viper.BindPFlag("mode", fileCmd.PersistentFlags().Lookup("mode"))
+}
+
+type FileFlags struct {
+	WriteToStdout bool
+	Verbose       bool
+	Mode          string
+	From          string
+	To            string
+}
+
+func getFileFlags(cmd *cobra.Command) FileFlags {
+	writeToStdOut, err := cmd.PersistentFlags().GetBool("stdout")
+	if err != nil {
+		log.Fatalln(err)
+	}
+	verbose, err := cmd.PersistentFlags().GetBool("verbose")
+	if err != nil {
+		log.Fatalln(err)
+	}
+	mode, err := cmd.PersistentFlags().GetString("mode")
+	if err != nil {
+		log.Fatalln(err)
+	}
+	from, err := cmd.PersistentFlags().GetString("from")
+	if err != nil {
+		log.Fatalln(err)
+	}
+	to, err := cmd.PersistentFlags().GetString("to")
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	return FileFlags{
+		WriteToStdout: writeToStdOut,
+		Mode:          mode,
+		From:          from,
+		To:            to,
+		Verbose:       verbose,
+	}
+}
+
+func validateFileFlags(flags FileFlags) {
+	if exist, err := utils.FileExists(flags.From); !exist {
+		log.Fatalf("the file path '%s' does not exist\n", flags.From)
+	} else if err != nil {
+		log.Fatalln(err)
+	}
+
+	// ! if 'to' is given, then only validate it, else
+	// ! just output the stuff to stdout, if given
+	if flags.To != "" {
+		if exist, err := utils.DirExists(flags.To); !exist {
+			log.Fatalf("the directory path '%s' does not exist\n", flags.To)
+		} else if err != nil {
+			log.Fatalln(err)
+		}
+	} else if flags.To == "" && !flags.WriteToStdout {
+		log.Fatalln("must provide -t <path> or -s, otherwise the operation is useless")
+	}
 }
