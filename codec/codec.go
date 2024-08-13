@@ -8,6 +8,8 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+
+	"github.com/Muhammed-Rajab/file-boy/utils"
 )
 
 type Codec struct {
@@ -140,14 +142,9 @@ func (c *Codec) DecryptFromToFile(fromPath string, toPath string, passphrase []b
 		return nil, err
 	}
 
-	outputFileName := ""
-	if strings.HasSuffix(fileName, ".encrypt") {
-		outputFileName = fileName[:len(fileName)-8] + ""
-	} else {
-		outputFileName = ""
-	}
-
+	outputFileName := utils.StripEncryptFromName(fileName)
 	outputPath := filepath.Join(toDir, outputFileName)
+
 	err = os.WriteFile(outputPath, dop.Data, 0644)
 	if err != nil {
 		return nil, err
@@ -158,6 +155,7 @@ func (c *Codec) DecryptFromToFile(fromPath string, toPath string, passphrase []b
 
 func (c *Codec) DecryptFromDirToZip(fromPath, toPath string, passphrase []byte) ([]DecryptionOp, error) {
 
+	// ! IMPLEMENT WAY TO DETERMINE A MORE SENSIBLE NAME FOR THE OUTPUT ZIP
 	outputZipFile, err := os.Create(path.Join(toPath, "decrypted.zip"))
 	if err != nil {
 		return nil, err
@@ -187,7 +185,7 @@ func (c *Codec) DecryptFromDirToZip(fromPath, toPath string, passphrase []byte) 
 		}
 
 		// if a file
-		if err := c.addDecryptedFileToZip(zipWriter, path, relPath, passphrase); err != nil {
+		if err := c.writeDecryptedFileToZip(zipWriter, path, relPath, passphrase); err != nil {
 			return err
 		}
 
@@ -201,20 +199,12 @@ func (c *Codec) DecryptFromDirToZip(fromPath, toPath string, passphrase []byte) 
 	return nil, nil
 }
 
-func (c *Codec) addDecryptedFileToZip(writer *zip.Writer, path, relPath string, passphrase []byte) error {
+func (c *Codec) writeDecryptedFileToZip(writer *zip.Writer, path, relPath string, passphrase []byte) error {
 
 	toDir := filepath.Dir(relPath)
 	fileName := filepath.Base(relPath)
 
-	outputFileName := ""
-	if strings.HasSuffix(fileName, ".encrypt") {
-		outputFileName = fileName[:len(fileName)-8]
-	} else {
-		outputFileName = fileName
-	}
-
 	dop, err := DecryptFromFile(path, passphrase)
-	// ! DON'T PANIC IF THERE'S A NON ENCRYPTED FILE
 	if err == ErrNotEncryptFile && c.verbose {
 		log.Println("not encrypted file found")
 		return nil
@@ -222,6 +212,7 @@ func (c *Codec) addDecryptedFileToZip(writer *zip.Writer, path, relPath string, 
 		return err
 	}
 
+	outputFileName := utils.StripEncryptFromName(fileName)
 	entry, err := writer.Create(filepath.Join(toDir, outputFileName))
 	if err != nil {
 		return err

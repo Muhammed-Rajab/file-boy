@@ -69,3 +69,10 @@ func GetPassphraseFromUser(confirm bool) ([]byte, error) {
 	}
 	return passphrase, nil
 }
+
+func StripEncryptFromName(fileName string) string {
+	if strings.HasSuffix(fileName, ".encrypt") {
+		return fileName[:len(fileName)-8] + ""
+	}
+	return fileName
+}
