@@ -97,7 +97,7 @@ var fileCmd = &cobra.Command{
 
 			if cdc.IsVerbose() {
 				end := time.Now()
-				log.Printf("successfully encrypted '%s'. ended at %v, took %d seconds.\n", from, end, end.Sub(start).Milliseconds())
+				log.Printf("successfully encrypted '%s'. ended at %v, took %d ms.\n", from, end, end.Sub(start).Milliseconds())
 			}
 		case utils.DECRYPT:
 			passphrase, err := utils.GetPassphraseFromUser(false)
@@ -132,7 +132,7 @@ var fileCmd = &cobra.Command{
 
 			if cdc.IsVerbose() {
 				end := time.Now()
-				log.Printf("successfully decrypted '%s'. ended at %v, took %d seconds.\n", from, end, end.Sub(start).Milliseconds())
+				log.Printf("successfully decrypted '%s'. ended at %v, took %d ms.\n", from, end, end.Sub(start).Milliseconds())
 			}
 		case utils.INVALID:
 			log.Fatalf("invalid mode '%s' provided. valid options (are e|E|encrypt|d|D|decrypt)\n", mode)
