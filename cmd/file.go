@@ -109,9 +109,18 @@ var fileCmd = &cobra.Command{
 				log.Printf("started at %v", start)
 			}
 
-			dop, err := cdc.DecryptFromToFile(from, to, passphrase)
-			if err != nil {
-				log.Fatalln(err)
+			var dop *codec.DecryptionOp
+
+			if to != "" {
+				dop, err = cdc.DecryptFromToFile(from, to, passphrase)
+				if err != nil {
+					log.Fatalln(err)
+				}
+			} else if to == "" {
+				dop, err = codec.DecryptFromFile(from, passphrase)
+				if err != nil {
+					log.Fatalln(err)
+				}
 			}
 
 			if writeToStdOut {
