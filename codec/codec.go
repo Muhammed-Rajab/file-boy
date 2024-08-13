@@ -113,7 +113,8 @@ func (c *Codec) writeEncryptedFileToZip(writer *zip.Writer, filePath, relPath st
 
 	combined := eop.AsBytes()
 
-	entry, err := writer.Create(relPath + ".encrypt")
+	outputFilePath := relPath + ".encrypt"
+	entry, err := writer.Create(outputFilePath)
 	if err != nil {
 		return err
 	}
