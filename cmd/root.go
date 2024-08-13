@@ -12,8 +12,19 @@ import (
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "file-boy",
-	Short: "a no-bs file encryption decryption suit for minimalists",
-	Long:  ``,
+	Short: "a no-bs encryption/decryption cli, made with 💖",
+	Long: `a no-bs encryption/decryption cli, made with 💖.
+
+file:
+	- encrypt
+	- decrypt
+	- output encrypted data to stdout
+	- output decrypted data to stdout
+dir:
+	- encrypt directory to zip
+	- decrypt directory of encrypted files to zip
+`,
+	Example: "file-boy file <args>\nfile-boy dir <args>",
 }
 
 func Execute() {
