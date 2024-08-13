@@ -50,13 +50,13 @@ func ValidateMode(mode string) OperationMode {
 }
 
 func GetPassphraseFromUser(confirm bool) ([]byte, error) {
-	fmt.Print("enter passphrase🔒: ")
+	fmt.Fprint(os.Stderr, "enter passphrase🔒: ")
 	passphrase, err := term.ReadPassword(int(os.Stdin.Fd()))
-	fmt.Println()
+	fmt.Fprintln(os.Stderr)
 	if confirm {
-		fmt.Print("re-enter passphrase🔒: ")
+		fmt.Fprint(os.Stderr, "re-enter passphrase🔒: ")
 		reentered, err := term.ReadPassword(int(os.Stdin.Fd()))
-		fmt.Println()
+		fmt.Fprintln(os.Stderr)
 		if err != nil {
 			return nil, err
 		}
