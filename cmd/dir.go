@@ -100,6 +100,7 @@ type DirFlags struct {
 	Mode    string
 	From    string
 	To      string
+	Exec    string
 }
 
 func getDirFlags(cmd *cobra.Command) DirFlags {
@@ -119,12 +120,17 @@ func getDirFlags(cmd *cobra.Command) DirFlags {
 	if err != nil {
 		log.Fatalln(err)
 	}
+	exec, err := cmd.PersistentFlags().GetString("exec")
+	if err != nil {
+		log.Fatalln(err)
+	}
 
 	return DirFlags{
 		Verbose: verbose,
 		Mode:    mode,
 		From:    from,
 		To:      to,
+		Exec:    exec,
 	}
 }
 
