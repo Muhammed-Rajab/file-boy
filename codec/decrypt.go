@@ -14,7 +14,7 @@ type DecryptionOp struct {
 }
 
 func decrypt(data, passphrase []byte) (*DecryptionOp, error) {
-	// ! prevents from slicing error
+	// prevents from slicing error
 	if len(data) < 32 {
 		return nil, ErrNotEncryptFile
 	}
