@@ -90,6 +90,9 @@ func init() {
 
 	dirCmd.PersistentFlags().StringP("mode", "m", "e", "the mode(encrypt|eE|decrypt|dD)")
 	viper.BindPFlag("mode", dirCmd.PersistentFlags().Lookup("mode"))
+
+	dirCmd.PersistentFlags().StringP("exec", "x", "", "execute the command with path, relative path and encrypted/decrypted data as arguments")
+	viper.BindPFlag("exec", dirCmd.PersistentFlags().Lookup("exec"))
 }
 
 type DirFlags struct {
