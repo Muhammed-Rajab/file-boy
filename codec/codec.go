@@ -28,6 +28,8 @@ func (c *Codec) IsVerbose() bool {
 func (c *Codec) EncryptFromDirToZip(fromPath, toPath string, passphrase []byte) ([]EncryptionOp, error) {
 
 	// Check if the to path exists and all
+	// ! MAYBE ADD A WAY TO CHANGE THE NAME OF THE FILE TO
+	// ! SOMETHING MORE MEANINGFUL
 	newZipFile, err := os.Create(path.Join(toPath, "output.zip"))
 	if err != nil {
 		return nil, err
