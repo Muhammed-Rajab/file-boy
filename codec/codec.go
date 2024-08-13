@@ -57,7 +57,9 @@ func (c *Codec) EncryptFromToFile(fromPath, toPath string, passphrase []byte) (*
 	return eop, nil
 }
 
-func (c *Codec) EncryptFromDirToZip(fromPath, toPath string, passphrase []byte) ([]EncryptionOp, error) {
+type EncryptFromDirToZipFunc func(from string, eop *EncryptionOp) error
+
+func (c *Codec) EncryptFromDirToZip(fromPath, toPath string, passphrase []byte, fn EncryptFromDirToZipFunc) ([]EncryptionOp, error) {
 
 	// ! MAYBE ADD A WAY TO CHANGE THE NAME OF THE FILE TO
 	// ! SOMETHING MORE MEANINGFUL
@@ -92,7 +94,13 @@ func (c *Codec) EncryptFromDirToZip(fromPath, toPath string, passphrase []byte) 
 		}
 
 		// file
-		if err := c.writeEncryptedFileToZip(zipWriter, path, relPath, passphrase); err != nil {
+		eop, err := c.writeEncryptedFileToZip(zipWriter, path, relPath, passphrase)
+		if err != nil {
+			return err
+		}
+
+		err = fn(path, eop)
+		if err != nil {
 			return err
 		}
 
@@ -106,11 +114,11 @@ func (c *Codec) EncryptFromDirToZip(fromPath, toPath string, passphrase []byte) 
 	return nil, nil
 }
 
-func (c *Codec) writeEncryptedFileToZip(writer *zip.Writer, filePath, relPath string, passphrase []byte) error {
+func (c *Codec) writeEncryptedFileToZip(writer *zip.Writer, filePath, relPath string, passphrase []byte) (*EncryptionOp, error) {
 
 	eop, err := EncryptFromFile(filePath, passphrase)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	combined := eop.AsBytes()
@@ -118,15 +126,15 @@ func (c *Codec) writeEncryptedFileToZip(writer *zip.Writer, filePath, relPath st
 	outputFilePath := relPath + ".encrypt"
 	entry, err := writer.Create(outputFilePath)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	_, err = entry.Write(combined)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return eop, nil
 }
 
 // DECRYPTION

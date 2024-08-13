@@ -22,6 +22,7 @@ var dirCmd = &cobra.Command{
 		from := flags.From
 		to := flags.To
 		verbose := flags.Verbose
+		// exec := flags.Exec
 
 		validateDirFlags(flags)
 
@@ -38,14 +39,23 @@ var dirCmd = &cobra.Command{
 			if err != nil {
 				log.Fatalln(err)
 			}
+
 			start := time.Now()
 			if cdc.IsVerbose() {
 				log.Printf("started at %v", start)
 			}
-			_, err = cdc.EncryptFromDirToZip(from, to, passphrase)
+
+			// ! COMMAND EXECUTION
+			_, err = cdc.EncryptFromDirToZip(from, to, passphrase, func(from string, eop *codec.EncryptionOp) error {
+				// ! EXECUTE THE COMMAND HERE
+
+				return nil
+			})
+
 			if err != nil {
 				log.Fatalln(err)
 			}
+
 			if cdc.IsVerbose() {
 				end := time.Now()
 				log.Printf("successfully encrypted '%s'. ended at %v, took %d ms.\n", from, end, end.Sub(start).Milliseconds())
