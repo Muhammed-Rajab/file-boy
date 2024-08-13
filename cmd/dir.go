@@ -13,42 +13,17 @@ import (
 // dirCmd represents the dir command
 var dirCmd = &cobra.Command{
 	Use:   "dir",
-	Short: "encrypt or decrypt the specified directory",
-	Long:  ``,
+	Short: "encrypt🔒/decrypt🔓 the specified directory to .zip🤐",
 	Run: func(cmd *cobra.Command, args []string) {
 
-		// IF mode is 'e' from is dir
-		// IF mode is 'd' from is zip(file)
-
 		// * Get all the flags
-		verbose, err := cmd.PersistentFlags().GetBool("verbose")
-		if err != nil {
-			log.Fatalln(err)
-		}
-		mode, err := cmd.PersistentFlags().GetString("mode")
-		if err != nil {
-			log.Fatalln(err)
-		}
-		from, err := cmd.PersistentFlags().GetString("from")
-		if err != nil {
-			log.Fatalln(err)
-		}
-		to, err := cmd.PersistentFlags().GetString("to")
-		if err != nil {
-			log.Fatalln(err)
-		}
+		flags := getDirFlags(cmd)
+		mode := flags.Mode
+		from := flags.From
+		to := flags.To
+		verbose := flags.Verbose
 
-		if exist, err := utils.DirExists(from); !exist {
-			log.Fatalf("the directory '%s' does not exists\n", from)
-		} else if err != nil {
-			log.Fatalln(err)
-		}
-
-		if exist, err := utils.DirExists(to); !exist {
-			log.Fatalf("the directory '%s' does not exists\n", to)
-		} else if err != nil {
-			log.Fatalln(err)
-		}
+		validateDirFlags(flags)
 
 		cdc := codec.NewCodec(verbose)
 
@@ -56,6 +31,8 @@ var dirCmd = &cobra.Command{
 		// ! MAYBE ONE DAY ADD A WAY TO CALL A PROGRAM
 		// ! WHICH TAKES IN RELPATH, ENCRYPTED/DECRYPTED DATA
 		// ! ETC, FOR EVERY FILE
+		// ! OR MAYBE ADD WAY TO OUTPUT THE DATA TO STDOUT
+		// ! BUT FOR NOW, THE APP HAS ENOUGH FEATURES FOR ME TO USE IT. Das is genug!
 		case utils.ENCRYPT:
 			passphrase, err := utils.GetPassphraseFromUser(true)
 			if err != nil {
@@ -113,4 +90,51 @@ func init() {
 
 	dirCmd.PersistentFlags().StringP("mode", "m", "e", "the mode(encrypt|eE|decrypt|dD)")
 	viper.BindPFlag("mode", dirCmd.PersistentFlags().Lookup("mode"))
+}
+
+type DirFlags struct {
+	Verbose bool
+	Mode    string
+	From    string
+	To      string
+}
+
+func getDirFlags(cmd *cobra.Command) DirFlags {
+	verbose, err := cmd.PersistentFlags().GetBool("verbose")
+	if err != nil {
+		log.Fatalln(err)
+	}
+	mode, err := cmd.PersistentFlags().GetString("mode")
+	if err != nil {
+		log.Fatalln(err)
+	}
+	from, err := cmd.PersistentFlags().GetString("from")
+	if err != nil {
+		log.Fatalln(err)
+	}
+	to, err := cmd.PersistentFlags().GetString("to")
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	return DirFlags{
+		Verbose: verbose,
+		Mode:    mode,
+		From:    from,
+		To:      to,
+	}
+}
+
+func validateDirFlags(flags DirFlags) {
+	if exist, err := utils.DirExists(flags.From); !exist {
+		log.Fatalf("the directory '%s' does not exists\n", flags.From)
+	} else if err != nil {
+		log.Fatalln(err)
+	}
+
+	if exist, err := utils.DirExists(flags.To); !exist {
+		log.Fatalf("the directory '%s' does not exists\n", flags.To)
+	} else if err != nil {
+		log.Fatalln(err)
+	}
 }
