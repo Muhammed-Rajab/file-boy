@@ -59,7 +59,7 @@ func encrypt(data, passphrase []byte) (*EncryptionOp, error) {
 	}, nil
 }
 
-func encryptFromFile(filePath string, passphrase []byte) (*EncryptionOp, error) {
+func EncryptFromFile(filePath string, passphrase []byte) (*EncryptionOp, error) {
 	plain, err := os.ReadFile(filePath)
 	if err != nil {
 		return nil, err

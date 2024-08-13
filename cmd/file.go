@@ -48,10 +48,16 @@ var fileCmd = &cobra.Command{
 			log.Fatalln(err)
 		}
 
-		if exist, err := utils.DirExists(to); !exist {
-			log.Fatalf("the directory path '%s' does not exist\n", to)
-		} else if err != nil {
-			log.Fatalln(err)
+		// ! if 'to' is given, then only validate it, else
+		// ! just output the stuff to stdout, if given
+		if to != "" {
+			if exist, err := utils.DirExists(to); !exist {
+				log.Fatalf("the directory path '%s' does not exist\n", to)
+			} else if err != nil {
+				log.Fatalln(err)
+			}
+		} else if to == "" && !writeToStdOut {
+			log.Fatalln("must provide -t <path> or -s, otherwise the operation is useless")
 		}
 
 		cdc := codec.NewCodec(verbose)
@@ -68,9 +74,18 @@ var fileCmd = &cobra.Command{
 				log.Printf("started at %v", start)
 			}
 
-			eop, err := cdc.EncryptFromToFile(from, to, passphrase)
-			if err != nil {
-				log.Fatalln(err)
+			var eop *codec.EncryptionOp
+
+			if to != "" {
+				eop, err = cdc.EncryptFromToFile(from, to, passphrase)
+				if err != nil {
+					log.Fatalln(err)
+				}
+			} else if to == "" {
+				eop, err = codec.EncryptFromFile(from, passphrase)
+				if err != nil {
+					log.Fatalln(err)
+				}
 			}
 
 			if writeToStdOut {
@@ -130,7 +145,7 @@ func init() {
 	viper.BindPFlag("from", fileCmd.PersistentFlags().Lookup("from"))
 
 	fileCmd.PersistentFlags().StringP("to", "t", "", "the path to the directory to encrypt/decrypt to")
-	fileCmd.MarkPersistentFlagRequired("to")
+	// fileCmd.MarkPersistentFlagRequired("to")
 	viper.BindPFlag("to", fileCmd.PersistentFlags().Lookup("to"))
 
 	fileCmd.PersistentFlags().StringP("mode", "m", "e", "the mode(encrypt|eE|decrypt|dD)")

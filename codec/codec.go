@@ -79,7 +79,7 @@ func (c *Codec) EncryptFromToFile(fromPath, toPath string, passphrase []byte) (*
 	toDir := filepath.Dir(toPath)
 	fileName := filepath.Base(fromPath)
 
-	eop, err := encryptFromFile(fromPath, passphrase)
+	eop, err := EncryptFromFile(fromPath, passphrase)
 	if err != nil {
 		return nil, err
 	}
@@ -107,7 +107,7 @@ func (c *Codec) EncryptFromToFile(fromPath, toPath string, passphrase []byte) (*
 
 func (c *Codec) addEncryptedFileToZip(zipWriter *zip.Writer, filePath, relPath string, passphrase []byte) error {
 
-	eop, err := encryptFromFile(filePath, passphrase)
+	eop, err := EncryptFromFile(filePath, passphrase)
 	if err != nil {
 		return err
 	}
@@ -135,7 +135,7 @@ func (c *Codec) DecryptFromToFile(fromPath string, toPath string, passphrase []b
 	toDir := filepath.Dir(toPath)
 	fileName := filepath.Base(fromPath)
 
-	dop, err := decryptFromFile(fromPath, passphrase)
+	dop, err := DecryptFromFile(fromPath, passphrase)
 	if err != nil {
 		return nil, err
 	}
@@ -216,7 +216,7 @@ func (c *Codec) addDecryptedFileToZip(writer *zip.Writer, path, relPath string, 
 		outputFileName = fileName
 	}
 
-	dop, err := decryptFromFile(path, passphrase)
+	dop, err := DecryptFromFile(path, passphrase)
 	// ! DON'T PANIC IF THERE'S A NON ENCRYPTED FILE
 	if err == ErrNotEncryptFile && c.verbose {
 		log.Println("not encrypted file found")

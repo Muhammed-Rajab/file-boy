@@ -54,7 +54,7 @@ func decrypt(data, passphrase []byte) (*DecryptionOp, error) {
 	}, nil
 }
 
-func decryptFromFile(filePath string, passphrase []byte) (*DecryptionOp, error) {
+func DecryptFromFile(filePath string, passphrase []byte) (*DecryptionOp, error) {
 
 	encrypted, err := os.ReadFile(filePath)
 	if err != nil {
