@@ -25,9 +25,38 @@ func (c *Codec) IsVerbose() bool {
 }
 
 // ENCRYPTION
+func (c *Codec) EncryptFromToFile(fromPath, toPath string, passphrase []byte) (*EncryptionOp, error) {
+	if !strings.HasSuffix(toPath, "/") {
+		toPath += "/"
+	}
+	toDir := filepath.Dir(toPath)
+	fileName := filepath.Base(fromPath)
+
+	eop, err := EncryptFromFile(fromPath, passphrase)
+	if err != nil {
+		return nil, err
+	}
+
+	outputFilePath := filepath.Join(toDir, fileName+".encrypt")
+
+	if exist, err := directoryExists(toDir); !exist {
+		return nil, ErrPathDoesNotExist
+	} else if err != nil {
+		return nil, err
+	}
+
+	combined := eop.AsBytes()
+
+	err = os.WriteFile(outputFilePath, combined, 0644)
+	if err != nil {
+		return nil, err
+	}
+
+	return eop, nil
+}
+
 func (c *Codec) EncryptFromDirToZip(fromPath, toPath string, passphrase []byte) ([]EncryptionOp, error) {
 
-	// Check if the to path exists and all
 	// ! MAYBE ADD A WAY TO CHANGE THE NAME OF THE FILE TO
 	// ! SOMETHING MORE MEANINGFUL
 	newZipFile, err := os.Create(path.Join(toPath, "output.zip"))
@@ -38,18 +67,19 @@ func (c *Codec) EncryptFromDirToZip(fromPath, toPath string, passphrase []byte) 
 	zipWriter := zip.NewWriter(newZipFile)
 	defer zipWriter.Close()
 
+	// recursive file tree traversal
 	err = filepath.WalkDir(fromPath, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
 
-		// relative to from path
+		// relative path fromPath -> path
 		relPath, err := filepath.Rel(fromPath, path)
 		if err != nil {
 			return err
 		}
 
-		// If it's a directory
+		// directory
 		if d.IsDir() {
 			if relPath != "." {
 				if _, err := zipWriter.Create(relPath + "/"); err != nil {
@@ -59,8 +89,8 @@ func (c *Codec) EncryptFromDirToZip(fromPath, toPath string, passphrase []byte) 
 			return nil
 		}
 
-		// If it's a file
-		if err := c.addEncryptedFileToZip(zipWriter, path, relPath, passphrase); err != nil {
+		// file
+		if err := c.writeEncryptedFileToZip(zipWriter, path, relPath, passphrase); err != nil {
 			return err
 		}
 
@@ -74,40 +104,7 @@ func (c *Codec) EncryptFromDirToZip(fromPath, toPath string, passphrase []byte) 
 	return nil, nil
 }
 
-func (c *Codec) EncryptFromToFile(fromPath, toPath string, passphrase []byte) (*EncryptionOp, error) {
-	if !strings.HasSuffix(toPath, "/") {
-		toPath += "/"
-	}
-	toDir := filepath.Dir(toPath)
-	fileName := filepath.Base(fromPath)
-
-	eop, err := EncryptFromFile(fromPath, passphrase)
-	if err != nil {
-		return nil, err
-	}
-
-	outputPath := filepath.Join(toDir, fileName+".encrypt")
-
-	if exist, err := directoryExists(toDir); !exist {
-		return nil, ErrPathDoesNotExist
-	} else if err != nil {
-		return nil, err
-	}
-
-	combined := eop.AsBytes()
-
-	err = os.WriteFile(outputPath, combined, 0644)
-	if err != nil {
-		return nil, err
-	}
-
-	eop.FromPath = fromPath
-	eop.ToPath = outputPath
-
-	return eop, nil
-}
-
-func (c *Codec) addEncryptedFileToZip(zipWriter *zip.Writer, filePath, relPath string, passphrase []byte) error {
+func (c *Codec) writeEncryptedFileToZip(writer *zip.Writer, filePath, relPath string, passphrase []byte) error {
 
 	eop, err := EncryptFromFile(filePath, passphrase)
 	if err != nil {
@@ -116,12 +113,12 @@ func (c *Codec) addEncryptedFileToZip(zipWriter *zip.Writer, filePath, relPath s
 
 	combined := eop.AsBytes()
 
-	zipFileEntry, err := zipWriter.Create(relPath + ".encrypt")
+	entry, err := writer.Create(relPath + ".encrypt")
 	if err != nil {
 		return err
 	}
 
-	_, err = zipFileEntry.Write(combined)
+	_, err = entry.Write(combined)
 	if err != nil {
 		return err
 	}
@@ -154,9 +151,6 @@ func (c *Codec) DecryptFromToFile(fromPath string, toPath string, passphrase []b
 	if err != nil {
 		return nil, err
 	}
-
-	dop.FromPath = fromPath
-	dop.ToPath = outputPath
 
 	return dop, err
 }

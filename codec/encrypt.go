@@ -7,11 +7,9 @@ import (
 )
 
 type EncryptionOp struct {
-	FromPath string
-	ToPath   string
-	Data     []byte
-	Salt     []byte
-	IV       []byte
+	Data []byte
+	Salt []byte
+	IV   []byte
 }
 
 func (eop *EncryptionOp) AsBytes() []byte {
