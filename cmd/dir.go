@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"log"
+	"os/exec"
+	"strings"
 	"time"
 
 	"github.com/Muhammed-Rajab/file-boy/codec"
@@ -22,7 +24,7 @@ var dirCmd = &cobra.Command{
 		from := flags.From
 		to := flags.To
 		verbose := flags.Verbose
-		// exec := flags.Exec
+		execCmd := flags.Exec
 
 		validateDirFlags(flags)
 
@@ -48,7 +50,15 @@ var dirCmd = &cobra.Command{
 			// ! COMMAND EXECUTION
 			_, err = cdc.EncryptFromDirToZip(from, to, passphrase, func(from string, eop *codec.EncryptionOp) error {
 				// ! EXECUTE THE COMMAND HERE
-
+				command := strings.Replace(execCmd, "\\{1}", from, 1)
+				command = strings.Replace(command, "\\{2}", string(eop.AsBytes()), 1)
+				output, err := exec.Command("sh", "-c", command).Output()
+				if err != nil {
+					return err
+				}
+				if cdc.IsVerbose() {
+					log.Print(string(output))
+				}
 				return nil
 			})
 
