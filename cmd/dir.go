@@ -56,6 +56,9 @@ var dirCmd = &cobra.Command{
 		cdc := codec.NewCodec(verbose)
 
 		switch utils.ValidateMode(mode) {
+		// ! MAYBE ONE DAY ADD A WAY TO CALL A PROGRAM
+		// ! WHICH TAKES IN RELPATH, ENCRYPTED/DECRYPTED DATA
+		// ! ETC, FOR EVERY FILE
 		case utils.ENCRYPT:
 			passphrase, err := utils.GetPassphraseFromUser(true)
 			if err != nil {
