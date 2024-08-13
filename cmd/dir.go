@@ -56,9 +56,7 @@ var dirCmd = &cobra.Command{
 				if err != nil {
 					return err
 				}
-				if cdc.IsVerbose() {
-					log.Print(string(output))
-				}
+				log.Print(string(output))
 				return nil
 			})
 
