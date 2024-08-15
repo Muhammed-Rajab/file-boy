@@ -57,11 +57,11 @@ func GetPassphraseFromUser(confirm bool) ([]byte, error) {
 		return []byte("pass"), nil
 	}
 
-	fmt.Fprint(os.Stderr, "enter passphrase🔒: ")
+	fmt.Fprint(os.Stderr, "enter passphrase: ")
 	passphrase, err := term.ReadPassword(int(os.Stdin.Fd()))
 	fmt.Fprintln(os.Stderr)
 	if confirm {
-		fmt.Fprint(os.Stderr, "re-enter passphrase🔒: ")
+		fmt.Fprint(os.Stderr, "re-enter passphrase: ")
 		reentered, err := term.ReadPassword(int(os.Stdin.Fd()))
 		fmt.Fprintln(os.Stderr)
 		if err != nil {
