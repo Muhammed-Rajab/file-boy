@@ -27,13 +27,13 @@ var dirCmd = &cobra.Command{
 
 		cdc := codec.NewCodec(verbose)
 
-		switch utils.ValidateMode(mode) {
+		switch ValidateMode(mode) {
 		// ! MAYBE ONE DAY ADD A WAY TO CALL A PROGRAM
 		// ! WHICH TAKES IN RELPATH, ENCRYPTED/DECRYPTED DATA
 		// ! ETC, FOR EVERY FILE
 		// ! OR MAYBE ADD WAY TO OUTPUT THE DATA TO STDOUT
 		// ! BUT FOR NOW, THE APP HAS ENOUGH FEATURES FOR ME TO USE IT. Das is genug!
-		case utils.ENCRYPT:
+		case ENCRYPT:
 			passphrase, err := utils.GetPassphraseFromUser(true)
 			if err != nil {
 				log.Fatalln(err)
@@ -50,7 +50,7 @@ var dirCmd = &cobra.Command{
 				end := time.Now()
 				log.Printf("successfully encrypted '%s'. ended at %v, took %d ms.\n", from, end, end.Sub(start).Milliseconds())
 			}
-		case utils.DECRYPT:
+		case DECRYPT:
 			passphrase, err := utils.GetPassphraseFromUser(false)
 			if err != nil {
 				log.Fatalln(err)
@@ -67,7 +67,7 @@ var dirCmd = &cobra.Command{
 				end := time.Now()
 				log.Printf("successfully decrypted '%s'. ended at %v, took %d ms.\n", from, end, end.Sub(start).Milliseconds())
 			}
-		case utils.INVALID:
+		case INVALID:
 			log.Fatalf("invalid mode '%s' provided. valid options (are e|E|encrypt|d|D|decrypt)\n", mode)
 		}
 

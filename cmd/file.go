@@ -30,8 +30,8 @@ var fileCmd = &cobra.Command{
 
 		cdc := codec.NewCodec(verbose)
 
-		switch utils.ValidateMode(mode) {
-		case utils.ENCRYPT:
+		switch ValidateMode(mode) {
+		case ENCRYPT:
 			passphrase, err := utils.GetPassphraseFromUser(true)
 			if err != nil {
 				log.Fatalln(err)
@@ -67,7 +67,7 @@ var fileCmd = &cobra.Command{
 				end := time.Now()
 				log.Printf("successfully encrypted '%s'. ended at %v, took %d ms.\n", from, end, end.Sub(start).Milliseconds())
 			}
-		case utils.DECRYPT:
+		case DECRYPT:
 			passphrase, err := utils.GetPassphraseFromUser(false)
 			if err != nil {
 				log.Fatalln(err)
@@ -101,7 +101,7 @@ var fileCmd = &cobra.Command{
 				end := time.Now()
 				log.Printf("successfully decrypted '%s'. ended at %v, took %d ms.\n", from, end, end.Sub(start).Milliseconds())
 			}
-		case utils.INVALID:
+		case INVALID:
 			log.Fatalf("invalid mode '%s' provided. valid options (are e|E|encrypt|d|D|decrypt)\n", mode)
 		}
 	},
