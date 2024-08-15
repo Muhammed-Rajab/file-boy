@@ -20,7 +20,7 @@ var fileCmd = &cobra.Command{
 		// * Get necessary flags
 		flags := getFileFlags(cmd)
 		from := flags.From
-		to := flags.From
+		to := flags.To
 		verbose := flags.Verbose
 		writeToStdOut := flags.WriteToStdout
 		mode := flags.Mode
