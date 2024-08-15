@@ -32,7 +32,7 @@ var fileCmd = &cobra.Command{
 
 		switch ValidateMode(mode) {
 		case ENCRYPT:
-			passphrase, err := utils.GetPassphraseFromUser(true)
+			passphrase, err := GetPassphraseFromUser(true)
 			if err != nil {
 				log.Fatalln(err)
 			}
@@ -68,7 +68,7 @@ var fileCmd = &cobra.Command{
 				log.Printf("successfully encrypted '%s'. ended at %v, took %d ms.\n", from, end, end.Sub(start).Milliseconds())
 			}
 		case DECRYPT:
-			passphrase, err := utils.GetPassphraseFromUser(false)
+			passphrase, err := GetPassphraseFromUser(false)
 			if err != nil {
 				log.Fatalln(err)
 			}

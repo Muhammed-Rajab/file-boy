@@ -34,7 +34,7 @@ var dirCmd = &cobra.Command{
 		// ! OR MAYBE ADD WAY TO OUTPUT THE DATA TO STDOUT
 		// ! BUT FOR NOW, THE APP HAS ENOUGH FEATURES FOR ME TO USE IT. Das is genug!
 		case ENCRYPT:
-			passphrase, err := utils.GetPassphraseFromUser(true)
+			passphrase, err := GetPassphraseFromUser(true)
 			if err != nil {
 				log.Fatalln(err)
 			}
@@ -51,7 +51,7 @@ var dirCmd = &cobra.Command{
 				log.Printf("successfully encrypted '%s'. ended at %v, took %d ms.\n", from, end, end.Sub(start).Milliseconds())
 			}
 		case DECRYPT:
-			passphrase, err := utils.GetPassphraseFromUser(false)
+			passphrase, err := GetPassphraseFromUser(false)
 			if err != nil {
 				log.Fatalln(err)
 			}
