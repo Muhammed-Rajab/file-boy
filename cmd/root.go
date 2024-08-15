@@ -9,8 +9,8 @@ import (
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "file-boy",
-	Short: "a no-bs encryption/decryption cli, made with 💖",
-	Long: `a no-bs encryption/decryption cli, made with 💖.
+	Short: "a no-bs encryption/decryption cli, made with go.",
+	Long: `a no-bs encryption/decryption cli, made with go.
 
 file:
 	- encrypt

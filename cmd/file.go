@@ -14,7 +14,7 @@ import (
 // fileCmd represents the file command
 var fileCmd = &cobra.Command{
 	Use:   "file",
-	Short: "encrypt🔒/decrypt🔓 the specified file, provided the right passphrase",
+	Short: "encrypt/decrypt the specified file, provided the right passphrase",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		// * Get necessary flags

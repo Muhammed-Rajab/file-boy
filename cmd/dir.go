@@ -13,7 +13,7 @@ import (
 // dirCmd represents the dir command
 var dirCmd = &cobra.Command{
 	Use:   "dir",
-	Short: "encrypt🔒/decrypt🔓 the specified directory to .zip🤐",
+	Short: "encrypt/decrypt the specified directory to .zip",
 	Run: func(cmd *cobra.Command, args []string) {
 
 		// * Get all the flags
