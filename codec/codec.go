@@ -183,19 +183,15 @@ func (c *Codec) DecryptFromToFile(fromPath string, toPath string, passphrase []b
 
 type DecryptFromDirFn func(filePath string, dop *DecryptionOp) error
 
-func (c *Codec) DecryptFromDirToZip(fromPath, toPath string, passphrase []byte, fn DecryptFromDirFn) ([]DecryptionOp, error) {
+func (c *Codec) DecryptFromDirToZipBuffer(fromPath string, passphrase []byte, fn DecryptFromDirFn) (*bytes.Buffer, error) {
 
-	// ! IMPLEMENT WAY TO DETERMINE A MORE SENSIBLE NAME FOR THE OUTPUT ZIP
-	outputZipFile, err := os.Create(path.Join(toPath, "decrypted.zip"))
-	if err != nil {
-		return nil, err
-	}
+	buf := new(bytes.Buffer)
 
-	zipWriter := zip.NewWriter(outputZipFile)
+	zipWriter := zip.NewWriter(buf)
 	defer zipWriter.Close()
 
 	// Go through all
-	err = filepath.WalkDir(fromPath, func(path string, d fs.DirEntry, err error) error {
+	err := filepath.WalkDir(fromPath, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
@@ -233,6 +229,27 @@ func (c *Codec) DecryptFromDirToZip(fromPath, toPath string, passphrase []byte, 
 	}
 
 	return nil, nil
+}
+
+func (c *Codec) DecryptFromDirToZipFile(fromPath, toPath string, passphrase []byte, fn DecryptFromDirFn) (*bytes.Buffer, error) {
+
+	// ! IMPLEMENT WAY TO DETERMINE A MORE SENSIBLE NAME FOR THE OUTPUT ZIP
+	outputZipFile, err := os.Create(path.Join(toPath, "decrypted.zip"))
+	if err != nil {
+		return nil, err
+	}
+
+	buf, err := c.DecryptFromDirToZipBuffer(fromPath, passphrase, fn)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = outputZipFile.Write(buf.Bytes())
+	if err != nil {
+		return nil, err
+	}
+
+	return buf, nil
 }
 
 func (c *Codec) writeDecryptedFileToZip(writer *zip.Writer, path, relPath string, passphrase []byte) (*DecryptionOp, error) {
