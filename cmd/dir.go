@@ -22,7 +22,9 @@ var dirCmd = &cobra.Command{
 		from := flags.From
 		to := flags.To
 		verbose := flags.Verbose
-		// execCmd := flags.Exec
+		execCmd := flags.Exec
+
+		log.Println(execCmd)
 
 		validateDirFlags(flags)
 
