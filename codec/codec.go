@@ -2,6 +2,7 @@ package codec
 
 import (
 	"archive/zip"
+	"bytes"
 	"io/fs"
 	"log"
 	"os"
@@ -59,20 +60,17 @@ func (c *Codec) EncryptFromToFile(fromPath, toPath string, passphrase []byte) (*
 
 type EncryptFromDirFn func(filePath string, eop *EncryptionOp) error
 
-func (c *Codec) EncryptFromDirToZip(fromPath, toPath string, passphrase []byte, fn EncryptFromDirFn) ([]EncryptionOp, error) {
+func (c *Codec) EncryptFromDirToZipBuffer(fromPath string, passphrase []byte, fn EncryptFromDirFn) (*bytes.Buffer, error) {
 
 	// ! MAYBE ADD A WAY TO CHANGE THE NAME OF THE FILE TO
 	// ! SOMETHING MORE MEANINGFUL
-	newZipFile, err := os.Create(path.Join(toPath, "output.zip"))
-	if err != nil {
-		return nil, err
-	}
+	buf := new(bytes.Buffer)
 
-	zipWriter := zip.NewWriter(newZipFile)
+	zipWriter := zip.NewWriter(buf)
 	defer zipWriter.Close()
 
 	// recursive file tree traversal
-	err = filepath.WalkDir(fromPath, func(path string, d fs.DirEntry, err error) error {
+	err := filepath.WalkDir(fromPath, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
@@ -111,7 +109,29 @@ func (c *Codec) EncryptFromDirToZip(fromPath, toPath string, passphrase []byte, 
 		return nil, err
 	}
 
-	return nil, nil
+	return buf, nil
+}
+
+func (c *Codec) EncryptFromDirToZipFile(fromPath, toPath string, passphrase []byte, fn EncryptFromDirFn) (*bytes.Buffer, error) {
+
+	// ! MAYBE ADD A WAY TO CHANGE THE NAME OF THE FILE TO
+	// ! SOMETHING MORE MEANINGFUL
+	newZipFile, err := os.Create(path.Join(toPath, "output.zip"))
+	if err != nil {
+		return nil, err
+	}
+
+	buf, err := c.EncryptFromDirToZipBuffer(fromPath, passphrase, fn)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = newZipFile.Write(buf.Bytes())
+	if err != nil {
+		return nil, err
+	}
+
+	return buf, nil
 }
 
 func (c *Codec) writeEncryptedFileToZip(writer *zip.Writer, filePath, relPath string, passphrase []byte) (*EncryptionOp, error) {

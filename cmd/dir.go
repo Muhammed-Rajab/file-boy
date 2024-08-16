@@ -3,6 +3,7 @@ package cmd
 import (
 	"bytes"
 	"log"
+	"os"
 	"time"
 
 	"github.com/Muhammed-Rajab/file-boy/codec"
@@ -53,18 +54,40 @@ var dirCmd = &cobra.Command{
 			// command {1}
 			// {1}=path in fs
 			// Stdin = piped file data
-			_, err = cdc.EncryptFromDirToZip(from, to, passphrase, func(filePath string, eop *codec.EncryptionOp) error {
-				if execCmd != "" {
-					err := ExecuteCommandString(execCmd, filePath, bytes.NewReader(eop.AsBytes()), &cdc)
-					if err != nil {
-						return err
+			var zipBuf *bytes.Buffer
+			if to != "" {
+				zipBuf, err = cdc.EncryptFromDirToZipFile(from, to, passphrase, func(filePath string, eop *codec.EncryptionOp) error {
+					if execCmd != "" {
+						err := ExecuteCommandString(execCmd, filePath, bytes.NewReader(eop.AsBytes()), &cdc)
+						if err != nil {
+							return err
+						}
 					}
+					return nil
+				})
+				if err != nil {
+					log.Fatalln(err)
 				}
-				return nil
-			})
+			} else if to == "" {
+				zipBuf, err = cdc.EncryptFromDirToZipBuffer(from, passphrase, func(filePath string, eop *codec.EncryptionOp) error {
+					if execCmd != "" {
+						err := ExecuteCommandString(execCmd, filePath, bytes.NewReader(eop.AsBytes()), &cdc)
+						if err != nil {
+							return err
+						}
+					}
+					return nil
+				})
+				if err != nil {
+					log.Fatalln(err)
+				}
+			}
 
-			if err != nil {
-				log.Fatalln(err)
+			if writeToStdout {
+				_, err = os.Stdout.Write(zipBuf.Bytes())
+				if err != nil {
+					log.Fatalln(err)
+				}
 			}
 
 			if cdc.IsVerbose() {
@@ -122,7 +145,6 @@ func init() {
 	viper.BindPFlag("from", dirCmd.PersistentFlags().Lookup("from"))
 
 	dirCmd.PersistentFlags().StringP("to", "t", "", "the path to the directory to encrypt/decrypt to")
-	dirCmd.MarkPersistentFlagRequired("to")
 	viper.BindPFlag("to", dirCmd.PersistentFlags().Lookup("to"))
 
 	dirCmd.PersistentFlags().StringP("mode", "m", "e", "the mode(encrypt|eE|decrypt|dD)")
