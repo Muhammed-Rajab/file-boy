@@ -22,10 +22,13 @@ var dirCmd = &cobra.Command{
 		mode := flags.Mode
 		from := flags.From
 		to := flags.To
-		verbose := flags.Verbose
 		execCmd := flags.Exec
+		verbose := flags.Verbose
+		writeToStdout := flags.WriteToStdout
 
 		validateDirFlags(flags)
+
+		log.Println(writeToStdout)
 
 		cdc := codec.NewCodec(verbose)
 
@@ -111,6 +114,9 @@ func init() {
 	dirCmd.PersistentFlags().BoolP("verbose", "v", false, "show detailed ouput")
 	viper.BindPFlag("verbose", dirCmd.PersistentFlags().Lookup("verbose"))
 
+	dirCmd.PersistentFlags().BoolP("stdout", "s", false, "writes the encrypted/decrypted data to os.Stdout")
+	viper.BindPFlag("stdout", dirCmd.PersistentFlags().Lookup("stdout"))
+
 	dirCmd.PersistentFlags().StringP("from", "f", "", "the path to the directory to encrypt/decrypt from")
 	dirCmd.MarkPersistentFlagRequired("from")
 	viper.BindPFlag("from", dirCmd.PersistentFlags().Lookup("from"))
@@ -127,14 +133,19 @@ func init() {
 }
 
 type DirFlags struct {
-	Verbose bool
-	Mode    string
-	From    string
-	To      string
-	Exec    string
+	WriteToStdout bool
+	Verbose       bool
+	Mode          string
+	From          string
+	To            string
+	Exec          string
 }
 
 func getDirFlags(cmd *cobra.Command) DirFlags {
+	writeToStdOut, err := cmd.PersistentFlags().GetBool("stdout")
+	if err != nil {
+		log.Fatalln(err)
+	}
 	verbose, err := cmd.PersistentFlags().GetBool("verbose")
 	if err != nil {
 		log.Fatalln(err)
@@ -157,11 +168,12 @@ func getDirFlags(cmd *cobra.Command) DirFlags {
 	}
 
 	return DirFlags{
-		Verbose: verbose,
-		Mode:    mode,
-		From:    from,
-		To:      to,
-		Exec:    exec,
+		Verbose:       verbose,
+		Mode:          mode,
+		From:          from,
+		To:            to,
+		Exec:          exec,
+		WriteToStdout: writeToStdOut,
 	}
 }
 

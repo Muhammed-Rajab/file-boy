@@ -19,11 +19,11 @@ var fileCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// * Get necessary flags
 		flags := getFileFlags(cmd)
+		mode := flags.Mode
 		from := flags.From
 		to := flags.To
 		verbose := flags.Verbose
 		writeToStdOut := flags.WriteToStdout
-		mode := flags.Mode
 
 		// * validate the flags
 		validateFileFlags(flags)
