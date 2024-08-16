@@ -55,23 +55,24 @@ var dirCmd = &cobra.Command{
 			// {1}=path in fs
 			// Stdin = piped file data
 			_, err = cdc.EncryptFromDirToZip(from, to, passphrase, func(filePath string, eop *codec.EncryptionOp) error {
+				if execCmd != "" {
+					execCmdString := strings.Replace(execCmd, "{1}", filePath, 1)
 
-				execCmdString := strings.Replace(execCmd, "{1}", filePath, 1)
+					cmd := exec.Command("sh", "-c", execCmdString)
+					cmd.Stdin = bytes.NewReader(eop.AsBytes())
 
-				cmd := exec.Command("sh", "-c", execCmdString)
-				cmd.Stdin = bytes.NewReader(eop.AsBytes())
+					var out bytes.Buffer
+					cmd.Stdout = &out
 
-				var out bytes.Buffer
-				cmd.Stdout = &out
-
-				err := cmd.Run()
-				if cdc.IsVerbose() {
-					if err != nil {
-						log.Printf("Error from runinng `%s`: %v\n", execCmdString, err)
-						log.Println("continuing")
+					err := cmd.Run()
+					if cdc.IsVerbose() {
+						if err != nil {
+							log.Printf("Error from runinng `%s`: %v\n", execCmdString, err)
+							log.Println("continuing")
+						}
 					}
+					fmt.Fprintf(os.Stderr, "[OUT]:\n%s\n", out.String())
 				}
-				fmt.Fprintf(os.Stderr, "[OUT]:\n%s\n", out.String())
 				return nil
 			})
 
