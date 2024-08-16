@@ -48,6 +48,9 @@ var dirCmd = &cobra.Command{
 			}
 
 			// ! COMMAND EXECUTION
+			// command {1}
+			// {1}=relative path from fs
+			// Stdin = piped file data
 			_, err = cdc.EncryptFromDirToZip(from, to, passphrase)
 
 			if err != nil {
