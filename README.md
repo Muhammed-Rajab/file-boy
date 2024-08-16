@@ -119,7 +119,7 @@ This command decrypts the `/path/to/encrypted/files/directory` directory and res
 13 August 2024
 - [❌] output encrypted `.zip` file from encrypting a directory to stdout
 - [❌] output decrypted `.zip` file from decrypting an encrypted directory to stdout
-- [❌] ability to pass the encrypted directory files with metadata to other programs
+- [✅] ability to pass the encrypted directory files with metadata to other programs
 - [❌] ability to pass the decrypted directory files with metadata to other programs
 
 ## Contributing
