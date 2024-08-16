@@ -57,6 +57,7 @@ file-boy dir [flags]
 - `-t, --to`: The path to the directory to encrypt/decrypt to (required).
 - `-m, --mode`: The mode of operation (`encrypt`, `e`, `E`, `decrypt`, `d`, `D`). Default is `encrypt`.
 - `-v, --verbose`: Show detailed output.
+- `-x, --exec`: Executes the given command and sets the `stdin` as the `.zip` bytes. You can use `{1}` in the argument and it will be replaced with the file path.
 
 #### Description
 
@@ -96,6 +97,12 @@ file-boy dir -f /path/to/encrypted/files/directory -t /path/to/store/decrypted.z
 
 This command decrypts the `/path/to/encrypted/files/directory` directory and restores the directory to `/path/to/store/decrypted.zip`
 
+#### Decrypt a Directory and pass each decrypted file to another program
+```sh
+file-boy dir -f /path/to/encrypted/files/directory -m d -v -x "echo {1}"
+```
+
+This command will decrypt every encrypted file in the directory and executes the given `-x` flag command, here which is `echo`. `{1}` is replaced by the path of the file which is decrypted. The `stdin` in of `echo` will be set to `zipBuf`, which is the internal representation of the zip file buffer in the cli.
 ## Flags
 
 ### Global Flags
@@ -114,13 +121,14 @@ This command decrypts the `/path/to/encrypted/files/directory` directory and res
 - `-f, --from`: The path to the directory to encrypt/decrypt from (required).
 - `-t, --to`: The path to the directory to encrypt/decrypt to (required).
 - `-m, --mode`: The mode of operation (`encrypt`, `e`, `E`, `decrypt`, `d`, `D`). Default is `encrypt`.
+- `-x, --exec`: Executes the given command and sets the `stdin` as the `.zip` bytes. You can use `{1}` in the argument and it will be replaced with the file path.
 
 ## TODO 📝
 13 August 2024
-- [✅] output encrypted `.zip` file from encrypting a directory to stdout
-- [✅] output decrypted `.zip` file from decrypting an encrypted directory to stdout
-- [✅] ability to pass the encrypted directory files with metadata to other programs
-- [✅] ability to pass the decrypted directory files with metadata to other programs
+- <s>[✅] output encrypted `.zip` file from encrypting a directory to stdout [16 August 2024]</s>
+- <s>[✅] output decrypted `.zip` file from decrypting an encrypted directory to stdout [16 August 2024]</s>
+- <s>[✅] ability to pass the encrypted directory files with metadata to other programs [16 August 2024]</s>
+- <s>[✅] ability to pass the decrypted directory files with metadata to other programs [16 August 2024]</s>
 
 ## Contributing
 
