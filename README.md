@@ -1,6 +1,6 @@
 # file-boy
 
-**file-boy** is a no-BS encryption/decryption CLI, made with 💖. It allows you to encrypt and decrypt files or entire directories with ease.
+**file-boy** is a no-BS encryption/decryption CLI, made with golang. It allows you to encrypt and decrypt files or entire directories with ease.
 
 ## Table of Contents
 
