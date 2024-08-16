@@ -161,7 +161,9 @@ func (c *Codec) DecryptFromToFile(fromPath string, toPath string, passphrase []b
 	return dop, err
 }
 
-func (c *Codec) DecryptFromDirToZip(fromPath, toPath string, passphrase []byte) ([]DecryptionOp, error) {
+type DecryptFromDirFn func(filePath string, dop *DecryptionOp) error
+
+func (c *Codec) DecryptFromDirToZip(fromPath, toPath string, passphrase []byte, fn DecryptFromDirFn) ([]DecryptionOp, error) {
 
 	// ! IMPLEMENT WAY TO DETERMINE A MORE SENSIBLE NAME FOR THE OUTPUT ZIP
 	outputZipFile, err := os.Create(path.Join(toPath, "decrypted.zip"))
@@ -193,7 +195,13 @@ func (c *Codec) DecryptFromDirToZip(fromPath, toPath string, passphrase []byte) 
 		}
 
 		// if a file
-		if err := c.writeDecryptedFileToZip(zipWriter, path, relPath, passphrase); err != nil {
+		dop, err := c.writeDecryptedFileToZip(zipWriter, path, relPath, passphrase)
+		if err != nil {
+			return err
+		}
+
+		err = fn(path, dop)
+		if err != nil {
 			return err
 		}
 
@@ -207,7 +215,7 @@ func (c *Codec) DecryptFromDirToZip(fromPath, toPath string, passphrase []byte) 
 	return nil, nil
 }
 
-func (c *Codec) writeDecryptedFileToZip(writer *zip.Writer, path, relPath string, passphrase []byte) error {
+func (c *Codec) writeDecryptedFileToZip(writer *zip.Writer, path, relPath string, passphrase []byte) (*DecryptionOp, error) {
 
 	toDir := filepath.Dir(relPath)
 	fileName := filepath.Base(relPath)
@@ -215,21 +223,21 @@ func (c *Codec) writeDecryptedFileToZip(writer *zip.Writer, path, relPath string
 	dop, err := DecryptFromFile(path, passphrase)
 	if err == ErrNotEncryptFile && c.verbose {
 		log.Println("not encrypted file found")
-		return nil
+		return nil, nil
 	} else if err != nil {
-		return err
+		return nil, err
 	}
 
 	outputFileName := utils.StripEncryptFromName(fileName)
 	entry, err := writer.Create(filepath.Join(toDir, outputFileName))
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	_, err = entry.Write(dop.Data)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return dop, nil
 }

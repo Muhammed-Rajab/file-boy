@@ -93,7 +93,20 @@ var dirCmd = &cobra.Command{
 			if cdc.IsVerbose() {
 				log.Printf("started at %v", start)
 			}
-			_, err = cdc.DecryptFromDirToZip(from, to, passphrase)
+
+			// ! COMMAND EXECUTION
+			// command {1}
+			// {1}=path in fs
+			// Stdin=piped file data
+			_, err = cdc.DecryptFromDirToZip(from, to, passphrase, func(filePath string, dop *codec.DecryptionOp) error {
+				if execCmd != "" {
+					err := ExecuteCommandString(execCmd, filePath, bytes.NewReader(dop.Data), &cdc)
+					if err != nil {
+						return err
+					}
+				}
+				return nil
+			})
 			if err != nil {
 				log.Fatalln(err)
 			}
