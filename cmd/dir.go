@@ -49,9 +49,12 @@ var dirCmd = &cobra.Command{
 
 			// ! COMMAND EXECUTION
 			// command {1}
-			// {1}=relative path from fs
+			// {1}=path in fs
 			// Stdin = piped file data
-			_, err = cdc.EncryptFromDirToZip(from, to, passphrase)
+			_, err = cdc.EncryptFromDirToZip(from, to, passphrase, func(filePath string, eop *codec.EncryptionOp) error {
+				log.Println("The file is", filePath)
+				return nil
+			})
 
 			if err != nil {
 				log.Fatalln(err)

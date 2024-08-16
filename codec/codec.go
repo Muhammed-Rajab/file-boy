@@ -57,7 +57,9 @@ func (c *Codec) EncryptFromToFile(fromPath, toPath string, passphrase []byte) (*
 	return eop, nil
 }
 
-func (c *Codec) EncryptFromDirToZip(fromPath, toPath string, passphrase []byte) ([]EncryptionOp, error) {
+type EncryptFromFileFn func(filePath string, eop *EncryptionOp) error
+
+func (c *Codec) EncryptFromDirToZip(fromPath, toPath string, passphrase []byte, fn EncryptFromFileFn) ([]EncryptionOp, error) {
 
 	// ! MAYBE ADD A WAY TO CHANGE THE NAME OF THE FILE TO
 	// ! SOMETHING MORE MEANINGFUL
@@ -92,7 +94,12 @@ func (c *Codec) EncryptFromDirToZip(fromPath, toPath string, passphrase []byte) 
 		}
 
 		// file
-		_, err = c.writeEncryptedFileToZip(zipWriter, path, relPath, passphrase)
+		eop, err := c.writeEncryptedFileToZip(zipWriter, path, relPath, passphrase)
+		if err != nil {
+			return err
+		}
+
+		err = fn(path, eop)
 		if err != nil {
 			return err
 		}
