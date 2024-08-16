@@ -14,13 +14,13 @@ import (
 // fileCmd represents the file command
 var fileCmd = &cobra.Command{
 	Use:   "file",
-	Short: "encrypt🔒/decrypt🔓 the specified file, provided the right passphrase",
+	Short: "encrypt/decrypt the specified file, provided the right passphrase",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		// * Get necessary flags
 		flags := getFileFlags(cmd)
 		from := flags.From
-		to := flags.From
+		to := flags.To
 		verbose := flags.Verbose
 		writeToStdOut := flags.WriteToStdout
 		mode := flags.Mode
@@ -30,9 +30,9 @@ var fileCmd = &cobra.Command{
 
 		cdc := codec.NewCodec(verbose)
 
-		switch utils.ValidateMode(mode) {
-		case utils.ENCRYPT:
-			passphrase, err := utils.GetPassphraseFromUser(true)
+		switch ValidateMode(mode) {
+		case ENCRYPT:
+			passphrase, err := GetPassphraseFromUser(true)
 			if err != nil {
 				log.Fatalln(err)
 			}
@@ -67,8 +67,8 @@ var fileCmd = &cobra.Command{
 				end := time.Now()
 				log.Printf("successfully encrypted '%s'. ended at %v, took %d ms.\n", from, end, end.Sub(start).Milliseconds())
 			}
-		case utils.DECRYPT:
-			passphrase, err := utils.GetPassphraseFromUser(false)
+		case DECRYPT:
+			passphrase, err := GetPassphraseFromUser(false)
 			if err != nil {
 				log.Fatalln(err)
 			}
@@ -101,7 +101,7 @@ var fileCmd = &cobra.Command{
 				end := time.Now()
 				log.Printf("successfully decrypted '%s'. ended at %v, took %d ms.\n", from, end, end.Sub(start).Milliseconds())
 			}
-		case utils.INVALID:
+		case INVALID:
 			log.Fatalf("invalid mode '%s' provided. valid options (are e|E|encrypt|d|D|decrypt)\n", mode)
 		}
 	},

@@ -1,12 +1,8 @@
 package utils
 
 import (
-	"bytes"
-	"fmt"
 	"os"
 	"strings"
-
-	"golang.org/x/term"
 )
 
 func FileExists(filePath string) (bool, error) {
@@ -29,45 +25,6 @@ func DirExists(dirPath string) (bool, error) {
 		return false, err
 	}
 	return info.IsDir(), nil
-}
-
-type OperationMode int
-
-const (
-	ENCRYPT OperationMode = iota
-	DECRYPT
-	INVALID
-)
-
-func ValidateMode(mode string) OperationMode {
-	if strings.HasPrefix(mode, "encrypt") || mode == "e" || mode == "E" {
-		return ENCRYPT
-	} else if strings.HasPrefix(mode, "decrypt") || mode == "d" || mode == "D" {
-		return DECRYPT
-	} else {
-		return INVALID
-	}
-}
-
-func GetPassphraseFromUser(confirm bool) ([]byte, error) {
-	fmt.Fprint(os.Stderr, "enter passphrase🔒: ")
-	passphrase, err := term.ReadPassword(int(os.Stdin.Fd()))
-	fmt.Fprintln(os.Stderr)
-	if confirm {
-		fmt.Fprint(os.Stderr, "re-enter passphrase🔒: ")
-		reentered, err := term.ReadPassword(int(os.Stdin.Fd()))
-		fmt.Fprintln(os.Stderr)
-		if err != nil {
-			return nil, err
-		}
-		if !bytes.Equal(passphrase, reentered) {
-			return nil, ErrMismatchingPassphrase
-		}
-	}
-	if err != nil {
-		return nil, err
-	}
-	return passphrase, nil
 }
 
 func StripEncryptFromName(fileName string) string {
