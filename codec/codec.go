@@ -258,8 +258,10 @@ func (c *Codec) writeDecryptedFileToZip(writer *zip.Writer, path, relPath string
 	fileName := filepath.Base(relPath)
 
 	dop, err := DecryptFromFile(path, passphrase)
-	if err == ErrNotEncryptFile && c.verbose {
-		log.Println("not encrypted file found")
+	if err == ErrNotEncryptFile {
+		if c.IsVerbose() {
+			log.Println("not encrypted file found")
+		}
 		return nil, nil
 	} else if err != nil {
 		return nil, err
