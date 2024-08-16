@@ -29,8 +29,6 @@ var dirCmd = &cobra.Command{
 
 		validateDirFlags(flags)
 
-		log.Println(writeToStdout)
-
 		cdc := codec.NewCodec(verbose)
 
 		switch ValidateMode(mode) {
