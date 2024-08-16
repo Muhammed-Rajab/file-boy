@@ -120,7 +120,7 @@ var dirCmd = &cobra.Command{
 				if err != nil {
 					log.Fatalln(err)
 				}
-			} else if to == "" {
+			} else {
 				zipBuf, err = cdc.DecryptFromDirToZipBuffer(from, passphrase, func(filePath string, dop *codec.DecryptionOp) error {
 					if execCmd != "" {
 						err := ExecuteCommandString(execCmd, filePath, bytes.NewReader(dop.Data), &cdc)

@@ -228,7 +228,7 @@ func (c *Codec) DecryptFromDirToZipBuffer(fromPath string, passphrase []byte, fn
 		return nil, err
 	}
 
-	return nil, nil
+	return buf, nil
 }
 
 func (c *Codec) DecryptFromDirToZipFile(fromPath, toPath string, passphrase []byte, fn DecryptFromDirFn) (*bytes.Buffer, error) {

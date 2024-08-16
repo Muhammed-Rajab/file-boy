@@ -10,7 +10,8 @@
       "request": "launch",
       "mode": "auto",
       "program": "${workspaceFolder}",
-      "args": ["file", "-f", "main.go", "-m", "e", "-v", "-t", "./cmd"],
+      // "args": ["file", "-f", "main.go", "-m", "e", "-v", "-t", "./cmd"],
+      "args": ["dir", "-f", "encrypted/", "-m", "d", "-s"],
       "buildFlags": "",
       "env": {
         "UNDER_DEBUG": "true"
