@@ -36,7 +36,7 @@ var dirCmd = &cobra.Command{
 		// ! MAYBE ONE DAY ADD A WAY TO CALL A PROGRAM
 		// ! WHICH TAKES IN RELPATH, ENCRYPTED/DECRYPTED DATA
 		// ! ETC, FOR EVERY FILE
-		// ! OR MAYBE ADD WAY TO OUTPUT THE DATA TO STDOUT
+		// ! MAYBE ADD WAY TO OUTPUT THE DATA TO STDOUT
 		// ! BUT FOR NOW, THE APP HAS ENOUGH FEATURES FOR ME TO USE IT. Das is genug!
 		case ENCRYPT:
 			passphrase, err := GetPassphraseFromUser(true)
@@ -184,9 +184,14 @@ func validateDirFlags(flags DirFlags) {
 		log.Fatalln(err)
 	}
 
-	if exist, err := utils.DirExists(flags.To); !exist {
-		log.Fatalf("the directory '%s' does not exists\n", flags.To)
-	} else if err != nil {
-		log.Fatalln(err)
+	// ! if 'to' is provided, then check if path exists. but if 'to', 'stdout' and 'exec' all are not provided, then show error
+	if flags.To != "" {
+		if exist, err := utils.DirExists(flags.To); !exist {
+			log.Fatalf("the directory '%s' does not exists\n", flags.To)
+		} else if err != nil {
+			log.Fatalln(err)
+		}
+	} else if flags.To == "" && !flags.WriteToStdout && flags.Exec == "" {
+		log.Fatalln("must provide -t <path> -s, -x <command {1}>,otherwise the operation is useless")
 	}
 }
