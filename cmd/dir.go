@@ -106,17 +106,39 @@ var dirCmd = &cobra.Command{
 			// command {1}
 			// {1}=path in fs
 			// Stdin=piped file data
-			_, err = cdc.DecryptFromDirToZip(from, to, passphrase, func(filePath string, dop *codec.DecryptionOp) error {
-				if execCmd != "" {
-					err := ExecuteCommandString(execCmd, filePath, bytes.NewReader(dop.Data), &cdc)
-					if err != nil {
-						return err
+			var zipBuf *bytes.Buffer
+			if to != "" {
+				zipBuf, err = cdc.DecryptFromDirToZipFile(from, to, passphrase, func(filePath string, dop *codec.DecryptionOp) error {
+					if execCmd != "" {
+						err := ExecuteCommandString(execCmd, filePath, bytes.NewReader(dop.Data), &cdc)
+						if err != nil {
+							return err
+						}
 					}
+					return nil
+				})
+				if err != nil {
+					log.Fatalln(err)
 				}
-				return nil
-			})
-			if err != nil {
-				log.Fatalln(err)
+			} else if to == "" {
+				zipBuf, err = cdc.DecryptFromDirToZipBuffer(from, passphrase, func(filePath string, dop *codec.DecryptionOp) error {
+					if execCmd != "" {
+						err := ExecuteCommandString(execCmd, filePath, bytes.NewReader(dop.Data), &cdc)
+						if err != nil {
+							return err
+						}
+					}
+					return nil
+				})
+				if err != nil {
+					log.Fatalln(err)
+				}
+			}
+			if writeToStdout {
+				_, err = os.Stdout.Write(zipBuf.Bytes())
+				if err != nil {
+					log.Fatalln(err)
+				}
 			}
 			if cdc.IsVerbose() {
 				end := time.Now()
