@@ -32,11 +32,6 @@ var dirCmd = &cobra.Command{
 		cdc := codec.NewCodec(verbose)
 
 		switch ValidateMode(mode) {
-		// ! MAYBE ONE DAY ADD A WAY TO CALL A PROGRAM
-		// ! WHICH TAKES IN RELPATH, ENCRYPTED/DECRYPTED DATA
-		// ! ETC, FOR EVERY FILE
-		// ! MAYBE ADD WAY TO OUTPUT THE DATA TO STDOUT
-		// ! BUT FOR NOW, THE APP HAS ENOUGH FEATURES FOR ME TO USE IT. Das is genug!
 		case ENCRYPT:
 			passphrase, err := GetPassphraseFromUser(true)
 			if err != nil {
